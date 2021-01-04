@@ -18,7 +18,7 @@ cli_opt default_options = {
     0.005
 };
 
-struct argparse get_argparse() {
+cli_opt process_args(int argc, const char **argv) {
     cli_opt nbody_options = default_options;
 
     struct argparse_option arg_options[] = {
@@ -39,5 +39,7 @@ struct argparse get_argparse() {
     argparse_init(&argparse, arg_options, usage, 0);
     argparse_describe(&argparse, "\nSimulate particle interactions using n-body.", "\nZachary Cauchi.");
 
-    return argparse;
+    argc = argparse_parse(&argparse, argc, argv);
+
+    return nbody_options;
 }

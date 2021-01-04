@@ -5,7 +5,7 @@
 int
 main(int argc, const char **argv)
 {
-    struct argparse argparse = get_argparse();
-    argc = argparse_parse(&argparse, argc, argv);
+    cli_opt args = process_args(argc, argv);
+    
     return 0;
 }

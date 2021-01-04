@@ -14,6 +14,6 @@ struct _nbody_options {
 
 typedef struct _nbody_options cli_opt;
 
-struct argparse get_argparse();
+cli_opt process_args(int argc, const char **argv);
 
 #endif
