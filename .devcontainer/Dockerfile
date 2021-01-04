@@ -1,6 +1,7 @@
 FROM centos:latest
 
-# Install lmod dependencies
+# Install dependencies
+RUN yum install -y dnf-plugins-core
 RUN dnf config-manager --set-enabled powertools
 
 # Install OpenHPC
