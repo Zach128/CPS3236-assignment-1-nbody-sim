@@ -1,7 +1,7 @@
 FROM centos:latest
 
 # Install lmod dependencies
-RUN dnf install --enablerepo=PowerTools -y lua-filesystem lua-posix
+RUN dnf config-manager --set-enabled powertools
 
 # Install OpenHPC
 RUN ARCH=$(uname -m) && \
