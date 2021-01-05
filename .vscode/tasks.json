@@ -9,6 +9,7 @@
                 "${workspaceFolder}/src/main.c",
                 "src/cli.c",
                 "src/fdata.c",
+                "src/bpoint.c",
                 "lib/argparse/argparse.c",
                 "-o",
                 "${workspaceFolder}/nbody.out"
