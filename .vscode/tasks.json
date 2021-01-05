@@ -8,6 +8,7 @@
                 "-g",
                 "${file}",
                 "src/cli.c",
+                "src/fdata.c",
                 "lib/argparse/argparse.c",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}.out"
