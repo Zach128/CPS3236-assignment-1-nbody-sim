@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "fdata.h"
-#include "types.h"
+#include "bpoint.h"
 
 /**
  * Function: open_file
@@ -72,7 +72,7 @@ int count_lines(FILE *fptr) {
  * returns: 0 if successful, -1 if unsuccessful.
  * 
  **/
-int load_points_from_file(const b_point *points, int count, FILE *fptr) {
+int load_points_from_file(const b_point *points, const int count, FILE *fptr) {
     int i = 0;
     
     // Load all the points by the expected pattern of mass, x, y.
@@ -109,9 +109,7 @@ int process_file(const char *path) {
     }
 
     printf("Printing points:\n");
-    for(int i = 0; i < line_count; i++) {
-        printf("%.3lf %.3lf %.3lf\n", points[i].mass, points[i].pos.x, points[i].pos.y);
-    }
+    print_points(points, line_count);
 
     fclose(fptr);
 
