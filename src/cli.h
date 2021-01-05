@@ -7,9 +7,9 @@ struct _nbody_options {
     char *file_path;
     bool output;
     int num_particles;
-    float grav_constant;
+    double grav_constant;
     int num_iterations;
-    float time_step;
+    double time_step;
 };
 
 typedef struct _nbody_options cli_opt;

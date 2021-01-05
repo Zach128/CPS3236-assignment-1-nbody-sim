@@ -10,7 +10,7 @@
                 "src/cli.c",
                 "lib/argparse/argparse.c",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}.out"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
