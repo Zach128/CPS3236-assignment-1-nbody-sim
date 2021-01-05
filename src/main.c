@@ -8,7 +8,7 @@ int main(int argc, const char **argv) {
     
     char *str = "./res/data/input_64.txt";
 
-    read_file(str);
+    process_file(str);
 
     return 0;
 }

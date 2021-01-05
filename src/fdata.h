@@ -5,6 +5,6 @@
 #define MAX_POINT_S_SIZE (__SIZEOF_DOUBLE__ + 2) * 3
 
 // Read a file at the given file path. Can be a relative or absolute path.
-void read_file(const char *path);
+int process_file(const char *path);
 
 #endif
