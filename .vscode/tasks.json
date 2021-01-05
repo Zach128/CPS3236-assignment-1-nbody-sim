@@ -6,12 +6,12 @@
             "command": "/opt/ohpc/pub/compiler/gcc/9.3.0/bin/gcc",
             "args": [
                 "-g",
-                "${file}",
+                "${workspaceFolder}/src/main.c",
                 "src/cli.c",
                 "src/fdata.c",
                 "lib/argparse/argparse.c",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}.out"
+                "${workspaceFolder}/nbody.out"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
