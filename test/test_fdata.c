@@ -26,12 +26,3 @@ void test_open_file_success(void **state) {
     will_return(fopen, "qests");
     assert_non_null(open_file("tests.out"));
 }
-
-void run_fdata_tests() {
-    const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_open_file_fails_bad_path),
-        cmocka_unit_test(test_open_file_success)
-    };
-
-    cmocka_run_group_tests_name("open_file", tests, NULL, NULL);
-}

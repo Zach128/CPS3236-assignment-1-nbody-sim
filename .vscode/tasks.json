@@ -6,10 +6,7 @@
             "command": "/opt/ohpc/pub/compiler/gcc/9.3.0/bin/gcc",
             "args": [
                 "-g",
-                "${workspaceFolder}/src/main.c",
-                "src/cli.c",
-                "src/fdata.c",
-                "src/bpoint.c",
+                "src/*.c",
                 "lib/argparse/argparse.c",
                 "-o",
                 "${workspaceFolder}/nbody.out"
@@ -32,8 +29,7 @@
             "command": "/opt/ohpc/pub/compiler/gcc/9.3.0/bin/gcc",
             "args": [
                 "-g",
-                "test/run_tests.c",
-                "test/test_fdata.c",
+                "test/*.c",
                 "src/cli.c",
                 "src/fdata.c",
                 "src/bpoint.c",
