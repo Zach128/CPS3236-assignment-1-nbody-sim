@@ -19,7 +19,7 @@ FILE *open_file(const char *path) {
     // Open the file for read-only, checking it was successfull.
     FILE *fptr = fopen(abs_path, "r");
     if (fptr == NULL) { 
-        printf("File couldn't be opened"); 
+        printf("File couldn't be opened\n");
         return NULL;
     }
 

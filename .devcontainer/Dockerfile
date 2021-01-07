@@ -10,8 +10,8 @@ RUN ARCH=$(uname -m) && \
     yum install -y $OHPC_URL
 RUN yum install -y openmpi4-gnu9-ohpc lmod-ohpc
 
-# Install otehr dev tools
-RUN yum install -y git make gdb
+# Install other dev tools
+RUN yum install -y git make gdb cmake
 
 # Load OpenMPI modules
 # RUN /bin/bash -c "module load gnu9 && module load openmpi4"
