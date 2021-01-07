@@ -59,26 +59,25 @@ int load_points_from_file(const b_point *points, const int count, FILE *fptr) {
     return 0;
 }
 
-int process_file(const char *path) {
+b_point *process_file(const char *path, int *point_count) {
     FILE *fptr = open_file(path);
 
-    const int line_count = count_lines(fptr);
-    
-    printf("Found points: %i\n", line_count);
+    // Save the number of points found.
+    *point_count = count_lines(fptr);
 
-    b_point points[line_count];
+    printf("Found points: %i\n", *point_count);
 
-    int load_result = load_points_from_file(points, line_count, fptr);
+    // Allocate space for them, so we can return a pointer to this space.
+    b_point *points = malloc(*point_count * sizeof(b_point));
+
+    int load_result = load_points_from_file(points, *point_count, fptr);
 
     if (load_result == -1) {
         printf("File processing failed\n");
-        return -1;
+        return NULL;
     }
-
-    printf("Printing points:\n");
-    print_points(points, line_count);
 
     fclose(fptr);
 
-    return 0;
+    return points;
 }

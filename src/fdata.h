@@ -48,10 +48,11 @@ int load_points_from_file(const b_point *points, const int count, FILE *fptr);
  * Read a file at the given file path. Can be a relative or absolute path.
  * 
  * path: Relative or absolute string file path to the file to load.
+ * point_count: A pointer to an integer representing the size of the loaded point array.
  * 
- * returns: 0 if successful, -1 if unsuccessful.
+ * returns: NULL if unsuccessful, a pointer to a point array of *point_count size.
  * 
  **/
-int process_file(const char *path);
+b_point *process_file(const char *path, int *point_count);
 
 #endif
