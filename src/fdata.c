@@ -5,16 +5,6 @@
 #include "fdata.h"
 #include "bpoint.h"
 
-/**
- * Function: open_file
- * -------------------
- * Read a file at the given file path. Can be a relative or absolute path.
- * 
- * path: Relative or absolute string file path to the file to load.
- * 
- * returns: 0 if successful, -1 if unsuccessful.
- * 
- **/
 FILE *open_file(const char *path) {
     char *abs_path;
     char path_buf [PATH_MAX+1];
@@ -23,29 +13,19 @@ FILE *open_file(const char *path) {
     abs_path = realpath(path, path_buf);
     if (abs_path == NULL) { 
         printf("File not found: %s\nResolved path: %s\n", path, path_buf); 
-        exit(0); 
+        return NULL;
     }
 
     // Open the file for read-only, checking it was successfull.
     FILE *fptr = fopen(abs_path, "r");
     if (fptr == NULL) { 
         printf("File couldn't be opened"); 
-        exit(0);
+        return NULL;
     }
 
     return fptr;
 }
 
-/**
- * Function: count_lines
- * ---------------------
- * Count the lines in a file. Used for checking how many points need to be loaded.
- * 
- * fptr: A pointer to a loaded file.
- * 
- * returns: Number of lines found.
- * 
- **/
 int count_lines(FILE *fptr) {
     int lines = 0;
 
@@ -59,19 +39,6 @@ int count_lines(FILE *fptr) {
     return lines;
 }
 
-/**
- * Function: load_points_from_file
- * -------------------------------
- * Load a number of points from a given file.
- * Points are saved to a given allocated array.
- * 
- * points: A pointer to a point array to be filled.
- * count: The number of points in the file to be loaded. Must equal the total lines of the file.
- * fptr: Pointer to a loaded file.
- * 
- * returns: 0 if successful, -1 if unsuccessful.
- * 
- **/
 int load_points_from_file(const b_point *points, const int count, FILE *fptr) {
     int i = 0;
     

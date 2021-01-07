@@ -3,7 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/usr/local/lib/"
             ],
             "defines": [],
             "compilerPath": "/opt/ohpc/pub/compiler/gcc/9.3.0/bin/gcc",
