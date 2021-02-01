@@ -9,7 +9,8 @@
                 "src/*.c",
                 "lib/argparse/argparse.c",
                 "-o",
-                "${workspaceFolder}/nbody.out"
+                "${workspaceFolder}/nbody.out",
+                "-lm"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -38,7 +39,8 @@
                 "/usr/local/lib/",
                 "-lcmocka",
                 "-o",
-                "${workspaceFolder}/tests.out"
+                "${workspaceFolder}/tests.out",
+                "-lm"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

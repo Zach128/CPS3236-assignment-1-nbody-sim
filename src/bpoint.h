@@ -1,17 +1,13 @@
 #ifndef BPOINT_H_
 #define BPOINT_H_
 
+#include "vector2.h"
+
 #define MASS_RAND_MAX 10
 #define X_RAND_MAX 5000
 #define X_RAND_MIN -5000
 #define Y_RAND_MAX 5000
 #define Y_RAND_MIN -5000
-
-typedef struct {
-    double x;
-    double y;
-} vector_2d;
-typedef vector_2d vec2;
 
 typedef struct {
     double mass;
