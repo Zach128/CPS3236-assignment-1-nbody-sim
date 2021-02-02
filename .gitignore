@@ -34,3 +34,6 @@
 
 cmockery/
 argparse/
+
+# Output files
+res/out

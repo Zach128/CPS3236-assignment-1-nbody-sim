@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "cli.h"
 #include "fdata.h"
 #include "bpoint.h"
@@ -33,11 +35,15 @@ int main(int argc, const char **argv) {
         bodyCount = num_points;
     }
 
+    // Process the points.
     print_point(&points[0]);
     ComputeForces(points, bodyCount, grav_constant, time_delta);
     print_point(&points[0]);
     MoveBodies(points, bodyCount, time_delta);
     print_point(&points[0]);
+
+    // Output the points.
+    save_points_to_file(points, bodyCount);
 
     return 0;
 }
