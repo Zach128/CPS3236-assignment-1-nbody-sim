@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "gcc-9 - Build and debug active file",
+            "name": "Nbody without file",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/nbody.out",

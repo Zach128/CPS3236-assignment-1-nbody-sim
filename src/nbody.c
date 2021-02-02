@@ -47,6 +47,17 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 
 		// Integrate velocity (m/s).
 		// p1.Velocity += acceleration * p_deltaT;
-		vec2Addvec2(&p1->pos, vec2Mulf(&acceleration, time_delta, &buffer), &p1->pos);
+		vec2Addvec2(&p1->vel, vec2Mulf(&acceleration, time_delta, &buffer), &p1->vel);
+	}
+}
+
+void MoveBodies(b_point *bodies, int body_count, float time_delta)
+{
+	vec2 buffer = { 0.f, 0.f };
+	for (int i = 0; i < body_count; i++)
+	{
+		// bodies[i]->pos += bodies[i].vel * time_delta;
+		vec2Mulf(&bodies[i].vel, time_delta, &buffer);
+		vec2Addvec2(&bodies[i].pos, &buffer, &bodies[i].pos);
 	}
 }

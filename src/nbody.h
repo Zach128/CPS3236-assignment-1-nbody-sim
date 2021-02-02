@@ -8,6 +8,7 @@
 #define FIELD_HEIGHT = 1000;
 #define FIELD_HALF_HEIGHT = FIELD_HEIGHT >> 1;
 
-void ComputeForces(const b_point *bodies, int body_count, float grav_constant, float time_delta);
+void ComputeForces(b_point *bodies, int body_count, float grav_constant, float time_delta);
+void MoveBodies(b_point *bodies, int body_count, float time_delta);
 
 #endif

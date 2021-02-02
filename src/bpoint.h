@@ -11,6 +11,7 @@
 
 typedef struct {
     double mass;
+    vec2 vel;
     vec2 pos;
 } body_point;
 typedef body_point b_point;
@@ -40,5 +41,7 @@ void print_points(b_point *points, const int count);
  * 
  **/
 void generate_rand_points(b_point *points, const int count);
+
+void print_point(b_point *point);
 
 #endif

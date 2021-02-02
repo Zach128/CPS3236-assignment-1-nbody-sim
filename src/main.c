@@ -25,7 +25,7 @@ int main(int argc, const char **argv) {
         bodyCount = point_count;
     } else if (args.num_particles > 0) {
         int num_points = args.num_particles;
-        b_point rand_points[num_points];
+        b_point *rand_points = malloc(num_points * sizeof(b_point));
 
         generate_rand_points(rand_points, num_points);
         printf("Generated %d points.\n", num_points);
@@ -33,7 +33,11 @@ int main(int argc, const char **argv) {
         bodyCount = num_points;
     }
 
+    print_point(&points[0]);
     ComputeForces(points, bodyCount, grav_constant, time_delta);
+    print_point(&points[0]);
+    MoveBodies(points, bodyCount, time_delta);
+    print_point(&points[0]);
 
     return 0;
 }
