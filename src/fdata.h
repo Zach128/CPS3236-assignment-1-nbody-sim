@@ -17,6 +17,8 @@ FILE *open_read_file(const char *path);
 
 FILE *open_write_file(const char *path);
 
+void create_new_file(int point_count);
+
 /**
  * Function: count_lines
  * ---------------------
@@ -57,6 +59,6 @@ int load_points_from_file(const b_point *points, const int count, FILE *fptr);
  **/
 b_point *process_file(const char *path, int *point_count);
 
-void save_points_to_file(b_point *points, int point_count);
+void save_points_iteration(b_point *points, int point_count);
 
 #endif

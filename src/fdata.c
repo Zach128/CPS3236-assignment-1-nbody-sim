@@ -7,19 +7,9 @@
 
 const char *out_path = "./res/out/";
 
-FILE *open_read_file(const char *path) {
-    char *abs_path;
-    char path_buf [PATH_MAX+1];
-
-    // Generate an absolute path from the given one, also checking if the file exists.
-    abs_path = realpath(path, path_buf);
-    if (abs_path == NULL) { 
-        printf("File not found: %s\nResolved path: %s\n", path, path_buf); 
-        return NULL;
-    }
-
+FILE *open_file(const char *path, const char *mode) {
     // Open the file for read-only, checking it was successfull.
-    FILE *fptr = fopen(abs_path, "r");
+    FILE *fptr = fopen(path, mode);
     if (fptr == NULL) { 
         printf("File couldn't be opened\n");
         return NULL;
@@ -28,21 +18,12 @@ FILE *open_read_file(const char *path) {
     return fptr;
 }
 
+FILE *open_read_file(const char *path) {
+    return open_file(path, "r");
+}
+
 FILE *open_write_file(const char *path) {
-    char *abs_path;
-    char path_buf [PATH_MAX+1];
-
-    // Generate an absolute path from the given one.
-    abs_path = realpath(path, path_buf);
-
-    // Open the file for write-only, checking it was successfull.
-    FILE *fptr = fopen(path, "w");
-    if (fptr == NULL) { 
-        printf("File couldn't be opened\n");
-        return NULL;
-    }
-
-    return fptr;
+    return open_file(path, "w");
 }
 
 int count_lines(FILE *fptr) {
@@ -101,8 +82,7 @@ b_point *process_file(const char *path, int *point_count) {
     return points;
 }
 
-void save_points_to_file(b_point *points, int point_count)
-{
+void create_new_file(int point_count) {
     char buffer[128];
     char filepath[32768];
 
@@ -113,6 +93,23 @@ void save_points_to_file(b_point *points, int point_count)
 
     FILE *file = open_write_file(filepath);
 
+    // Save a header containing the number of points to load.
+    fprintf(file, "%d\n", point_count);
+    fclose(file);
+}
+
+void save_points_iteration(b_point *points, int point_count)
+{
+    char buffer[128];
+    char filepath[32768];
+
+    // Create the file path.
+    snprintf(buffer, 128, "nbody_%d.txt", point_count);
+    strcpy(filepath, out_path);
+    strcat(filepath, buffer);
+
+    FILE *file = open_file(filepath, "a+");
+
     double m, x, y;
 
     for (int i = 0; i < point_count; i++)
@@ -121,8 +118,7 @@ void save_points_to_file(b_point *points, int point_count)
         x = points[i].pos.x;
         y = points[i].pos.y;
 
-        snprintf(buffer, 128, "%.6f %.6f %.6f\n", m, x, y);
-        fputs(buffer, file);
+        fprintf(file, "%.6f %.6f %.6f\n", m, x, y);
     }
 
     fclose(file);

@@ -11,6 +11,7 @@ int main(int argc, const char **argv) {
     double grav_constant = args.grav_constant;
     double time_delta = args.time_step;
     int bodyCount = 0;
+    int totalIterations = args.num_iterations;
     b_point *points = NULL;
 
     // If the provided file path isn't empty, load data from the file.
@@ -35,15 +36,20 @@ int main(int argc, const char **argv) {
         bodyCount = num_points;
     }
 
-    // Process the points.
-    print_point(&points[0]);
-    ComputeForces(points, bodyCount, grav_constant, time_delta);
-    print_point(&points[0]);
-    MoveBodies(points, bodyCount, time_delta);
-    print_point(&points[0]);
+    // Initialise a new file first.
+    create_new_file(bodyCount);
 
-    // Output the points.
-    save_points_to_file(points, bodyCount);
+    for(int i = 0; i < totalIterations; i++) {
+        // Process the points.
+        ComputeForces(points, bodyCount, grav_constant, time_delta);
+        print_point(&points[0]);
+        MoveBodies(points, bodyCount, time_delta);
+        print_point(&points[0]);    
+        
+        // Output the points.
+        save_points_iteration(points, bodyCount);
+    }
+
 
     return 0;
 }
