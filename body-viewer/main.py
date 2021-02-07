@@ -1,6 +1,7 @@
 import os.path
-from os import path
+import threading
 import PySimpleGUI as sg
+from os import path
 
 def loadPoints(filePath):
     pointFile = open(filePath, "r")
@@ -59,22 +60,11 @@ def filePromptMain():
         if event in (sg.WIN_CLOSED, "Exit", "Cancel"):
             break
 
-        print(values)
-
         filePath = values["file-path"]
         width = values["width"]
         height = values["height"]
         frameLength = values["frame-length"]
         loopMode = values["loop-mode"]
-
-        if event == "width":
-            print("Handling width")
-        elif event == "height":
-            print("Handling height")
-        elif event == "frame-length":
-            print("Handling frame-length")
-        elif event == "loop-mode":
-            print("Handling loop-mode")
 
         # Handle the submit event and form validation.
         if event == "submit":
@@ -134,9 +124,12 @@ def filePromptMain():
                 isSuccess = True
 
 def playbackMain(iterations, width, height, frameLength, loopMode):
+    playbackLength = len(iterations) * frameLength
+    currIteration = 0
+
     playerLayout = [
         [sg.Graph(key="canvas", canvas_size=(width, height), graph_bottom_left=(-width, -height), graph_top_right=(width, height), background_color="white")],
-        [sg.Cancel()]
+        [sg.Text(f"Playback: {currIteration * frameLength}s : {playbackLength}s")]
     ]
     playerWindow = sg.Window(title="nbody output", layout=playerLayout)
     playerWindow.Finalize()
@@ -144,8 +137,9 @@ def playbackMain(iterations, width, height, frameLength, loopMode):
     graph = playerWindow["canvas"]
 
     # Populate the graph with all the bodies.
-    for body in iterations[0]:
-        graph.DrawCircle((body["x"], body["y"]), body["mass"], fill_color="black", line_color="blue")
+    # for body in iterations[currIteration]:
+    #     graph.DrawCircle((body["x"], body["y"]), body["mass"], fill_color="black", line_color="blue")
+    updateGraph(graph, iterations, currIteration)
 
     # Main loop for the animation playback window.
     while True:
@@ -154,6 +148,15 @@ def playbackMain(iterations, width, height, frameLength, loopMode):
         # Close the prompt if the user closes it.
         if event in (sg.WIN_CLOSED, "Exit", "Cancel"):
             break
+
+# Minimal update function
+def updateGraph(graph, iterations, iterationIndex):
+    if iterationIndex < len(iterations):
+        threading.Timer(0.03, updateGraph, (graph, iterations, iterationIndex + 1)).start()
+
+        graph.erase()
+        for body in iterations[iterationIndex]:
+            graph.DrawCircle((body["x"], body["y"]), body["mass"], fill_color="black", line_color="blue")
 
 iterations, width, height, frameLength, loopMode = filePromptMain()
 
