@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "gcc-9 - Build and debug active file",
+            "name": "Nbody without file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "program": "${workspaceFolder}/nbody.out",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -23,6 +23,51 @@
                 }
             ],
             "preLaunchTask": "C/C++: gcc-9 build active file",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Nbody with file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/nbody.out",
+            "args": [
+                "-f",
+                "res/data/input_64.txt"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "C/C++: gcc-9 build active file",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "gcc-9 - Build and debug tests",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests.out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "C/C++: gcc-9 build tests",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

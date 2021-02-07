@@ -31,3 +31,9 @@
 *.exe
 *.out
 *.app
+
+cmockery/
+argparse/
+
+# Output files
+res/out
