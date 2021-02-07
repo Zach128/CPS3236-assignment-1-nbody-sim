@@ -38,12 +38,21 @@ def filePromptMain():
     # Components of the file prompter.
     filePromptMain = [
         [sg.Text("Select an input file to open")],
-        [sg.In(key="file-path"), sg.FileBrowse()],
+        [sg.In(key="file-path", enable_events=True), sg.FileBrowse()],
+        [
+            sg.Text("Width: "),
+            sg.Input(key="width", size=(10, 1), default_text="500", enable_events=True),
+            sg.Text("Height: "),
+            sg.Input(key="height", size=(10, 1), default_text="500", enable_events=True)
+        ],
+        [sg.Text("Frame duration (in seconds): "), sg.Input(key="frame-length", size=(10, 1), default_text="0.005", enable_events=True)],
+        [sg.Checkbox("Loop animation: ", key="loop-mode", default=False, enable_events=True)],
         [sg.Open(key="submit"), sg.Cancel()]
     ]
     filePrompt = sg.Window(title="Select points file", layout=filePromptMain)
 
     while True:
+        isSuccess = True
         event, values = filePrompt.read()
         
         # Close the prompt if the user closes it.
@@ -53,21 +62,80 @@ def filePromptMain():
         print(values)
 
         filePath = values["file-path"]
+        width = values["width"]
+        height = values["height"]
+        frameLength = values["frame-length"]
+        loopMode = values["loop-mode"]
 
-        # Check if the file exists.
-        if event == "submit" and filePath and path.exists(filePath) and path.isfile(filePath):
-            data = loadPoints(filePath)
+        if event == "width":
+            print("Handling width")
+        elif event == "height":
+            print("Handling height")
+        elif event == "frame-length":
+            print("Handling frame-length")
+        elif event == "loop-mode":
+            print("Handling loop-mode")
 
-            filePrompt.close()
+        # Handle the submit event and form validation.
+        if event == "submit":
+            # Check if the path exists.
+            if filePath and path.exists(filePath) and path.isfile(filePath):
+                data = loadPoints(filePath)
+            else:
+                # Print an error if the file doesn't exist.
+                sg.popup_quick_message("Bad path", f"The path \"{filePath}\" is not a valid")
+                isSuccess = False
+            
+            # Handle width
+            if width:
+                try:
+                    width = int(width)
+                except:
+                    # Print an error width parsing failed.
+                    sg.popup_quick_message("Bad width", f"The width must be a valid whole number. \"{width}\" is not valid.")
+                    isSuccess = False
+            else:
+                # Print an error if the width.
+                sg.popup_quick_message("No width", "A width in pixels needs to be entered.")
+                isSuccess = False
+            
+            # Handle height
+            if height:
+                try:
+                    height = int(height)
+                except:
+                    # Print an error height parsing failed.
+                    sg.popup_quick_message("Bad height", f"The height must be a valid whole number. \"{height}\" is not valid.")
+                    isSuccess = False
+            else:
+                # Print an error if the height.
+                sg.popup_quick_message("No height", "A height in pixels needs to be entered.")
+                isSuccess = False
+            
+            # Handle frame length
+            if frameLength:
+                try:
+                    frameLength = float(frameLength)
+                except:
+                    # Print an error frameLength parsing failed.
+                    sg.popup_quick_message("Bad frame duration", f"The frame must be a valid number number. \"{frameLength}\" is not valid.")
+                    isSuccess = False
+            else:
+                # Print an error if the frameLength is not entered.
+                sg.popup_quick_message("No frame duration", "A frame length in seconds needs to be entered.")
+                isSuccess = False
 
-            return data
-        else:
-            # Print an error if the file doesn't exist.
-            sg.popup_quick_message("Bad path", f"The path \"{filePath}\" is not a valid")
+            # If validation was successful, continue.
+            if isSuccess:
+                filePrompt.close()
 
-def playbackMain(iterations):
+                return data, width, height, frameLength, loopMode
+            else:
+                isSuccess = True
+
+def playbackMain(iterations, width, height, frameLength, loopMode):
     playerLayout = [
-        [sg.Graph(key="canvas", canvas_size=(256,256), graph_bottom_left=(-500,-500), graph_top_right=(500, 500), background_color="white")],
+        [sg.Graph(key="canvas", canvas_size=(width, height), graph_bottom_left=(-width, -height), graph_top_right=(width, height), background_color="white")],
         [sg.Cancel()]
     ]
     playerWindow = sg.Window(title="nbody output", layout=playerLayout)
@@ -87,5 +155,6 @@ def playbackMain(iterations):
         if event in (sg.WIN_CLOSED, "Exit", "Cancel"):
             break
 
-iterations = filePromptMain()
-playbackMain(iterations)
+iterations, width, height, frameLength, loopMode = filePromptMain()
+
+playbackMain(iterations, width, height, frameLength, loopMode)
