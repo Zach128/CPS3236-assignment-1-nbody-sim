@@ -13,5 +13,8 @@ RUN yum install -y openmpi4-gnu9-ohpc lmod-ohpc
 # Install other dev tools
 RUN yum install -y git make gdb cmake
 
+# Install python
+RUN yum install -y python3
+
 # Load OpenMPI modules
 # RUN /bin/bash -c "module load gnu9 && module load openmpi4"
