@@ -29,36 +29,63 @@ def loadPoints(filePath):
         iterationIndex = i // pointCount
         iterations[iterationIndex][pointIndex] = point
 
-    print(iterations)
-
     # We're finished. Close the file.
     pointFile.close()
 
-fileOpenerlayout = [
-    [sg.Text("Select an input file to open")],
-    [sg.In(key="file-path"), sg.FileBrowse()],
-    [sg.Open(key="submit"), sg.Cancel()]
-]
+    return iterations
 
-filePrompt = sg.Window(title="Hello World", layout=fileOpenerlayout)
+def filePromptMain():
+    # Components of the file prompter.
+    filePromptMain = [
+        [sg.Text("Select an input file to open")],
+        [sg.In(key="file-path"), sg.FileBrowse()],
+        [sg.Open(key="submit"), sg.Cancel()]
+    ]
+    filePrompt = sg.Window(title="Select points file", layout=filePromptMain)
 
-while True:
-    event, values = filePrompt.read()
-    
-    # Close the prompt if the user closes it.
-    if event in (sg.WIN_CLOSED, "Exit", "Cancel"):
-        break
-
-    print(values)
-
-    filePath = values["file-path"]
-
-    # Check if the file exists.
-    if event == "submit" and filePath and path.exists(filePath) and path.isfile(filePath):
-        loadPoints(filePath)
-
-    else:
-        # Print an error if the file doesn't exist.
-        sg.popup_quick_message("Bad path", f"The path \"{filePath}\" is not a valid")
+    while True:
+        event, values = filePrompt.read()
         
+        # Close the prompt if the user closes it.
+        if event in (sg.WIN_CLOSED, "Exit", "Cancel"):
+            break
 
+        print(values)
+
+        filePath = values["file-path"]
+
+        # Check if the file exists.
+        if event == "submit" and filePath and path.exists(filePath) and path.isfile(filePath):
+            data = loadPoints(filePath)
+
+            filePrompt.close()
+
+            return data
+        else:
+            # Print an error if the file doesn't exist.
+            sg.popup_quick_message("Bad path", f"The path \"{filePath}\" is not a valid")
+
+def playbackMain(iterations):
+    playerLayout = [
+        [sg.Graph(key="canvas", canvas_size=(256,256), graph_bottom_left=(-500,-500), graph_top_right=(500, 500), background_color="white")],
+        [sg.Cancel()]
+    ]
+    playerWindow = sg.Window(title="nbody output", layout=playerLayout)
+    playerWindow.Finalize()
+
+    graph = playerWindow["canvas"]
+
+    # Populate the graph with all the bodies.
+    for body in iterations[0]:
+        graph.DrawCircle((body["x"], body["y"]), body["mass"], fill_color="black", line_color="blue")
+
+    # Main loop for the animation playback window.
+    while True:
+        event, values = playerWindow.read()
+        
+        # Close the prompt if the user closes it.
+        if event in (sg.WIN_CLOSED, "Exit", "Cancel"):
+            break
+
+iterations = filePromptMain()
+playbackMain(iterations)
