@@ -24,7 +24,7 @@ class NbodyPlayer:
 
         playerLayout = [
             [sg.Graph(key="canvas", canvas_size=(width, height), graph_bottom_left=(-width, -height), graph_top_right=(width, height), background_color="white")],
-            [sg.Text(f"Playback: {self.currIteration * self.frameLength}s : {self.playbackLength}s", key="play-time", size=(50, 1))],
+            [sg.Text("", key="play-time", size=(50, 1))],
             [sg.Button(key="play-pause", button_text="Pause", enable_events=True)]
         ]
 
@@ -48,6 +48,7 @@ class NbodyPlayer:
         while True:
             event, values = self.window.read()
             
+            # Handle the play/pause button.
             if event == "play-pause":
                 self.play = not self.play
 
@@ -57,7 +58,7 @@ class NbodyPlayer:
                 else:
                     self.window["play-pause"].update(text="Play")
 
-            # Close the prompt if the user closes it.
+            # Shut down the player if the user closes it.
             if event in (sg.WIN_CLOSED, "Exit", "Cancel"):
                 if self.graphTimer:
                     self.graphTimer.cancel()
@@ -66,12 +67,12 @@ class NbodyPlayer:
                 self.window.close()
                 break
 
-    # Minimal update function
     def updateGraph(self):
+        # If we still have frames to draw and we're still playing...
         if self.currIteration < self.totalIterations and self.play and not self.closed:
             graph = self.window["canvas"]
 
-            # Draw all the points at the given iteration.
+            # Draw all the points in the given frame.
             graph.erase()
             for body in self.iterations[self.currIteration]:
                 # Handle situation where window closed while updating.
@@ -87,9 +88,8 @@ class NbodyPlayer:
             # Update the play time label
             self.updatePlaybackText()
 
-            self.currIteration += 1
-
             # Set up the next frame
+            self.currIteration += 1
             self.graphTimer = threading.Timer(self.frameLength, self.updateGraph)
             self.graphTimer.start()
         
@@ -99,6 +99,6 @@ class NbodyPlayer:
             self.updateGraph()
 
     def updatePlaybackText(self):
-        # timeStr = str(round(self.currIteration * self.frameLength, 3))
+        # Draw the playback text including elapsed time.
         currTime = f"{round(self.currIteration * self.frameLength, 2)}s".ljust(7, " ")
         self.window["play-time"].update(f"Playback: {currTime}: {self.playbackLength}s")
