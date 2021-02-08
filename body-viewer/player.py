@@ -24,7 +24,7 @@ class NbodyPlayer:
 
         playerLayout = [
             [sg.Graph(key="canvas", canvas_size=(width, height), graph_bottom_left=(-width, -height), graph_top_right=(width, height), background_color="white")],
-            [sg.Text(f"Playback: {self.currIteration * self.frameLength}s : {self.playbackLength}s", key="play-time", size=(20, 1))],
+            [sg.Text(f"Playback: {self.currIteration * self.frameLength}s : {self.playbackLength}s", key="play-time", size=(50, 1))],
             [sg.Button(key="play-pause", button_text="Pause", enable_events=True)]
         ]
 
