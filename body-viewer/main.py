@@ -1,7 +1,10 @@
 import os.path
+from os import path
+
 import threading
 import PySimpleGUI as sg
-from os import path
+
+from player import NbodyPlayer
 
 def loadPoints(filePath):
     pointFile = open(filePath, "r")
@@ -123,41 +126,8 @@ def filePromptMain():
             else:
                 isSuccess = True
 
-def playbackMain(iterations, width, height, frameLength, loopMode):
-    playbackLength = len(iterations) * frameLength
-    currIteration = 0
-
-    playerLayout = [
-        [sg.Graph(key="canvas", canvas_size=(width, height), graph_bottom_left=(-width, -height), graph_top_right=(width, height), background_color="white")],
-        [sg.Text(f"Playback: {currIteration * frameLength}s : {playbackLength}s")]
-    ]
-    playerWindow = sg.Window(title="nbody output", layout=playerLayout)
-    playerWindow.Finalize()
-
-    graph = playerWindow["canvas"]
-
-    # Populate the graph with all the bodies.
-    # for body in iterations[currIteration]:
-    #     graph.DrawCircle((body["x"], body["y"]), body["mass"], fill_color="black", line_color="blue")
-    updateGraph(graph, iterations, currIteration)
-
-    # Main loop for the animation playback window.
-    while True:
-        event, values = playerWindow.read()
-        
-        # Close the prompt if the user closes it.
-        if event in (sg.WIN_CLOSED, "Exit", "Cancel"):
-            break
-
-# Minimal update function
-def updateGraph(graph, iterations, iterationIndex):
-    if iterationIndex < len(iterations):
-        threading.Timer(0.03, updateGraph, (graph, iterations, iterationIndex + 1)).start()
-
-        graph.erase()
-        for body in iterations[iterationIndex]:
-            graph.DrawCircle((body["x"], body["y"]), body["mass"], fill_color="black", line_color="blue")
-
 iterations, width, height, frameLength, loopMode = filePromptMain()
 
-playbackMain(iterations, width, height, frameLength, loopMode)
+player = NbodyPlayer(iterations, width, height, frameLength, loopMode)
+
+player.update()
