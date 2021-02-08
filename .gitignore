@@ -35,5 +35,11 @@
 cmockery/
 argparse/
 
+# Reference implementation
+res/ref
+
 # Output files
 res/out
+
+# Python compiled files
+*.pyc
