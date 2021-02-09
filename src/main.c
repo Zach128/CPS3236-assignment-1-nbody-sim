@@ -16,10 +16,9 @@ int main(int argc, const char **argv) {
 
     // If the provided file path isn't empty, load data from the file.
     if (args.file_path[0] != '\0') {
-        char *str = "./res/data/input_64.txt";
 
         int point_count;
-        b_point *file_points = process_file(str, &point_count);
+        b_point *file_points = process_file(args.file_path, &point_count);
 
         printf("Loaded file points:\n");
         print_points(file_points, point_count);

@@ -10,7 +10,8 @@
                 "lib/argparse/argparse.c",
                 "-o",
                 "${workspaceFolder}/nbody.out",
-                "-lm"
+                "-lm",
+                "-fopenmp"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
