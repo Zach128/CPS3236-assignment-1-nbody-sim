@@ -22,7 +22,7 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 
 	float distance;
 
-	# pragma omp for private(direction,force,acceleration,buffer)
+	#pragma omp for private(direction,force,acceleration,buffer)
 	for (int j = 0; j < body_count; ++j)
 	{
 		b_point *p1 = &bodies[j];
