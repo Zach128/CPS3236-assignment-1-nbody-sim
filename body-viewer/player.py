@@ -23,7 +23,7 @@ class NbodyPlayer:
         height = self.height
 
         playerLayout = [
-            [sg.Graph(key="canvas", canvas_size=(width, height), graph_bottom_left=(-width, -height), graph_top_right=(width, height), background_color="white")],
+            [sg.Graph(key="canvas", canvas_size=(min(width, 1280), min(height, 720)), graph_bottom_left=(-width, -height), graph_top_right=(width, height), background_color="white")],
             [sg.Text("", key="play-time", size=(50, 1))],
             [sg.Button(key="play-pause", button_text="Pause", enable_events=True)]
         ]
