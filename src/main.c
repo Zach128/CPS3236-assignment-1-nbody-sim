@@ -42,8 +42,6 @@ int main(int argc, const char **argv) {
     for(int i = 0; i < totalIterations; i++) {
         // Process the points.
         ComputeForces(points, bodyCount, grav_constant, time_delta);
-        print_point(&points[0]);
-        MoveBodies(points, bodyCount, time_delta);
         print_point(&points[0]);    
         
         // Output the points.

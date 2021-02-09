@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fdata.h"
 #include "bpoint.h"
@@ -39,7 +40,7 @@ int count_lines(FILE *fptr) {
     return lines;
 }
 
-int load_points_from_file(const b_point *points, const int count, FILE *fptr) {
+int load_points_from_file(b_point *points, const int count, FILE *fptr) {
     int i = 0;
     
     // Load all the points by the expected pattern of mass, x, y.

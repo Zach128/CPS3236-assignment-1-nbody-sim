@@ -44,7 +44,7 @@ int count_lines(FILE *fptr);
  * returns: 0 if successful, -1 if unsuccessful.
  * 
  **/
-int load_points_from_file(const b_point *points, const int count, FILE *fptr);
+int load_points_from_file(b_point *points, const int count, FILE *fptr);
 
 /**
  * Function: process_file

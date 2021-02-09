@@ -3,6 +3,18 @@
 #include "vector2.h"
 #include "bpoint.h"
 
+void MoveBodies(b_point *bodies, int body_count, float time_delta)
+{
+	vec2 buffer = { 0.f, 0.f };
+
+	for (int i = 0; i < body_count; i++)
+	{
+		// bodies[i]->pos += bodies[i].vel * time_delta;
+		vec2Mulf(&bodies[i].vel, time_delta, &buffer);
+		vec2Addvec2(&bodies[i].pos, &buffer, &bodies[i].pos);
+	}
+}
+
 void ComputeForces(b_point *bodies, int body_count, float grav_constant, float time_delta)
 {
 	vec2 direction,
@@ -10,6 +22,7 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 
 	float distance;
 
+	# pragma omp for private(direction,force,acceleration,buffer)
 	for (int j = 0; j < body_count; ++j)
 	{
 		b_point *p1 = &bodies[j];
@@ -49,15 +62,6 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 		// p1.Velocity += acceleration * p_deltaT;
 		vec2Addvec2(&p1->vel, vec2Mulf(&acceleration, time_delta, &buffer), &p1->vel);
 	}
-}
 
-void MoveBodies(b_point *bodies, int body_count, float time_delta)
-{
-	vec2 buffer = { 0.f, 0.f };
-	for (int i = 0; i < body_count; i++)
-	{
-		// bodies[i]->pos += bodies[i].vel * time_delta;
-		vec2Mulf(&bodies[i].vel, time_delta, &buffer);
-		vec2Addvec2(&bodies[i].pos, &buffer, &bodies[i].pos);
-	}
+	MoveBodies(bodies, body_count, time_delta);
 }
