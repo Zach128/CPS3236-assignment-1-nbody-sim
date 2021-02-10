@@ -7,7 +7,7 @@ void MoveBodies(b_point *bodies, int body_count, float time_delta)
 {
 	vec2 buffer = { 0.f, 0.f };
 
-	#pragma omp parallel for private(buffer)
+	#pragma omp parallel for private(buffer), schedule(static, 8)
 	for (int i = 0; i < body_count; i++)
 	{
 		// bodies[i]->pos += bodies[i].vel * time_delta;
@@ -23,7 +23,7 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 
 	float distance;
 
-	#pragma omp parallel for private(direction,force,acceleration,buffer, distance), schedule(dynamic, 50)
+	#pragma omp parallel for private(direction,force,acceleration,buffer, distance), schedule(static, 8)
 		for (int j = 0; j < body_count; ++j)
 		{
 			b_point *p1 = &bodies[j];
