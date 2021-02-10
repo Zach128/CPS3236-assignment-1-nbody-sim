@@ -92,7 +92,8 @@ CFLAGS  = -DUSE_OMP -g -O2 -lm -fopenmp
 CXXFLAGS= -g -O2 -lm -fopenmp
 
 # The C program compiler.
-CC     = gcc
+CC     = mpicc
+MPICC  = mpicc
 
 # The C++ program compiler.
 #CXX    = g++
@@ -136,6 +137,7 @@ DEP_OPT = $(shell if `$(CC) --version | grep "GCC" >/dev/null`; then \
 DEPEND      = $(CC)  $(DEP_OPT)  $(MY_CFLAGS) $(CFLAGS) $(CPPFLAGS)
 DEPEND.d    = $(subst -g ,,$(DEPEND))
 COMPILE.c   = $(CC)  $(MY_CFLAGS) $(CFLAGS)   $(CPPFLAGS) -c
+COMPILE.mpi.c   = $(MPICC)  $(MY_CFLAGS) $(CFLAGS)   $(CPPFLAGS) -c
 COMPILE.cxx = $(CXX) $(MY_CFLAGS) $(CXXFLAGS) $(CPPFLAGS) -c
 LINK.c      = $(CC)  $(MY_CFLAGS) $(CFLAGS)   $(CPPFLAGS) $(LDFLAGS)
 LINK.cxx    = $(CXX) $(MY_CFLAGS) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS)
