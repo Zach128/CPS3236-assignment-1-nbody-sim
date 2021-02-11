@@ -22,14 +22,20 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 # Add a prefix to INC_DIRS. So moduleA would become -ImoduleA. GCC understands this -I flag
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
+# If we want to use OpenMP, add in the appropriate directives.
+ifeq ($(use_omp),true)
+OMP_FLAG := -DUSE_OMP -fopenmp
+endif
+
 # The -MMD and -MP flags together generate Makefiles for us!
 # These files will have .d instead of .o as the output.
-CPPFLAGS := $(INC_FLAGS) -MMD -MP -g -O2 -DUSE_OMP -fopenmp
+CPPFLAGS := $(INC_FLAGS) -MMD -MP -g -O2 $(OMP_FLAG)
 
 LDFLAGS := -lm -fopenmp
 
 # The final build step.
 $(TARGET_EXEC): $(OBJS)
+	@echo OMP: $(OMP_FLAG)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 	@echo Type ./$@ to execute the program.
 
@@ -48,6 +54,12 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 clean:
 	-rm -r $(BUILD_DIR)
 	-rm $(TARGET_EXEC)
+
+help:
+	@echo -----------------------------------------------------------------
+	@echo make: Make into nbody.out
+	@echo make use_omp=true: Make into nbody.out with OpenMP functionality.
+	@echo -----------------------------------------------------------------
 
 # Include the .d makefiles. The - at the front suppresses the errors of missing
 # Makefiles. Initially, all the .d files will be missing, and we don't want those
