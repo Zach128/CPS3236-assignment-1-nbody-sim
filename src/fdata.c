@@ -66,10 +66,10 @@ b_point *process_file(const char *path, int *point_count) {
     // Save the number of points found.
     *point_count = count_lines(fptr);
 
-    printf("Found points: %i\n", *point_count);
+    printf("Found points: %d\n", *point_count);
 
     // Allocate space for them, so we can return a pointer to this space.
-    b_point *points = malloc(*point_count * sizeof(b_point));
+    b_point *points = calloc(*point_count, sizeof(b_point));
 
     int load_result = load_points_from_file(points, *point_count, fptr);
 

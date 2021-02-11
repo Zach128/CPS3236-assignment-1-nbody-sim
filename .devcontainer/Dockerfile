@@ -16,7 +16,7 @@ RUN ARCH=$(uname -m) && \
 RUN yum install -y openmpi4-gnu9-ohpc lmod-ohpc
 
 # Install other dev tools
-RUN yum install -y git make gdb cmake
+RUN yum install -y git make gdb cmake valgrind
 
 # Install python
 RUN yum install -y python3 python3-tkinter

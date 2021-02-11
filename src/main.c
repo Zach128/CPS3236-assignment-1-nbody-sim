@@ -83,37 +83,45 @@ int main(int argc, const char **argv) {
 
     // Since slave processes wont have the arrays initialised, tell them to allocate the space.
     if (rank != 0) {
-        int res = MPI_Alloc_mem(sizeof(b_point) * bodyCount, MPI_INFO_NULL, &points);
-        // points = malloc(sizeof(b_point) * bodyCount);
+        // int res = MPI_Alloc_mem(sizeof(b_point) * bodyCount, MPI_INFO_ENV, &points);
+        points = malloc(sizeof(b_point) * bodyCount);
 
-        if (res != MPI_SUCCESS) {
-            printf("Failed to allocate space for points.\n");
-            return 1;
-        }
+        // if (res != MPI_SUCCESS) {
+        //     printf("Failed to allocate space for points.\n");
+        //     return 1;
+        // }
     }
 
-    MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
+    int result = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
+
+    if (result != MPI_SUCCESS) {
+        printf("Failed to receive points\n");
+        return 1;
+    }
 
     // Debug info.
     printf("Hello world from process %s with rank %d out of %d processors\n", hostname, rank, numtasks);
     printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, totalIterations);
     printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
 
-    for(int i = 0; i < totalIterations; i++) {
-        // Process the points.
-        ComputeForces(points, bodyCount, grav_constant, time_delta);
+    // for(int i = 0; i < totalIterations; i++) {
+    //     // Process the points.
+    //     ComputeForces(points, bodyCount, grav_constant, time_delta);
         
-        // Output the points (if we're on the master process).
-        if (rank == 0)
-        {
-            save_points_iteration(points, bodyCount);
-        }
-    }
+    //     // Output the points (if we're on the master process).
+    //     if (rank == 0)
+    //     {
+    //         save_points_iteration(points, bodyCount);
+    //     }
+    // }
 
     // Clean up
     if (rank != 0) {
-        MPI_Free_mem(points);
+        printf("Cleaning up\n");
+        free(points);
+        // MPI_Free_mem(points);
     }
+    
     MPI_Type_free(&mpi_b_point_t);
     MPI_Finalize();
 
