@@ -1,5 +1,10 @@
 FROM centos:latest
 
+ARG USERNAME=vscode
+
+# Add default user named vscode
+RUN useradd -ms /bin/bash $USERNAME
+
 # Install dependencies
 RUN yum install -y dnf-plugins-core
 RUN dnf config-manager --set-enabled powertools
@@ -16,6 +21,14 @@ RUN yum install -y git make gdb cmake
 # Install python
 RUN yum install -y python3 python3-tkinter
 RUN python3 -m pip install pysimplegui
+
+RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
+    && mkdir /commandhistory \
+    && touch /commandhistory/.bash_history \
+    && chown -R $USERNAME /commandhistory \
+    && echo $SNIPPET >> "/home/$USERNAME/.bashrc"
+
+USER $USERNAME
 
 # Load OpenMPI modules
 # RUN /bin/bash -c "module load gnu9 && module load openmpi4"
