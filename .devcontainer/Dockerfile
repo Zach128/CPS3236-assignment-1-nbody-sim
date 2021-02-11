@@ -28,6 +28,8 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
     && chown -R $USERNAME /commandhistory \
     && echo $SNIPPET >> "/home/$USERNAME/.bashrc"
 
+ADD load_mpi.sh /etc/profile.d/
+
 USER $USERNAME
 
 # Load OpenMPI modules
