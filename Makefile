@@ -35,7 +35,6 @@ LDFLAGS := -lm -fopenmp
 
 # The final build step.
 $(TARGET_EXEC): $(OBJS)
-	@echo OMP: $(OMP_FLAG)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 	@echo Type ./$@ to execute the program.
 

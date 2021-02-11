@@ -17,6 +17,7 @@ int main(int argc, const char **argv) {
     {
         printf ("Error starting MPI program. Terminating.\n");
         MPI_Abort(MPI_COMM_WORLD, rc);
+        return 1;
     }
 
     // Register b_point type with mpi.
@@ -100,30 +101,31 @@ int main(int argc, const char **argv) {
     }
 
     // Debug info.
-    printf("Hello world from process %s with rank %d out of %d processors\n", hostname, rank, numtasks);
-    printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, totalIterations);
-    printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
+    // printf("Hello world from process %s with rank %d out of %d processors\n", hostname, rank, numtasks);
+    // printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, totalIterations);
+    // printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
 
-    // for(int i = 0; i < totalIterations; i++) {
-    //     // Process the points.
-    //     ComputeForces(points, bodyCount, grav_constant, time_delta);
+    for(int i = 0; i < totalIterations; i++) {
+        // Process the points.
+        ComputeForces(points, bodyCount, grav_constant, time_delta);
         
-    //     // Output the points (if we're on the master process).
-    //     if (rank == 0)
-    //     {
-    //         save_points_iteration(points, bodyCount);
-    //     }
+        // Output the points (if we're on the master process).
+        if (rank == 0)
+        {
+            save_points_iteration(points, bodyCount);
+        }
+    }
+
+
+    // For some reason, running the below would cause one of the nodes to throw a segfault.
+    // Clean up
+    // if (rank != 0) {
+    //     printf("Cleaning up\n");
+    //     free(points);
+    //     // MPI_Free_mem(points);
     // }
 
-    // Clean up
-    if (rank != 0) {
-        printf("Cleaning up\n");
-        free(points);
-        // MPI_Free_mem(points);
-    }
-    
-    MPI_Type_free(&mpi_b_point_t);
+    MPI_Type_free(mpi_b_point_t);
     MPI_Finalize();
-
     return 0;
 }

@@ -5,6 +5,34 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(mpi) Nbody with file",
+            "type": "cppdbg",
+            "request": "attach",
+            "processId": "${command:pickProcess}",
+            "program": "/opt/ohpc/pub/mpi/openmpi4-gnu9/4.0.4/bin/mpirun",
+            "args": [
+                "-np",
+                "2",
+                "nbody.out",
+                "-f",
+                "res/data/input_64.txt"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            // "preLaunchTask": "C/C++: mpicc build active file",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "Nbody without file",
             "type": "cppdbg",
             "request": "launch",
@@ -47,34 +75,6 @@
                 }
             ],
             "preLaunchTask": "C/C++: mpicc build active file",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "(mpi) Nbody with file",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "/opt/ohpc/pub/mpi/openmpi4-gnu9/4.0.4/bin/mpirun",
-            "args": [
-                "-np",
-                "2",
-                "--allow-run-as-root",
-                "nbody.out",
-                "-f",
-                "res/data/input_64.txt"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            // "preLaunchTask": "C/C++: mpicc build active file",
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
