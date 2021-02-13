@@ -8,6 +8,8 @@
 #define FIELD_HEIGHT = 1000;
 #define FIELD_HALF_HEIGHT = FIELD_HEIGHT >> 1;
 
+void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int body_count, float time_delta);
+void syncBodiesWithMaster(b_point *points);
 void ComputeForces(b_point *bodies, int body_count, float grav_constant, float time_delta);
 void MoveBodies(b_point *bodies, int body_count, float time_delta);
 

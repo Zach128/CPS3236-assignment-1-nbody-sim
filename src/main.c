@@ -20,21 +20,7 @@ int main(int argc, const char **argv) {
         return 1;
     }
 
-    // Register b_point type with mpi.
-    const int n_props = 5;
-    int blocklengths[5] = { 2, 2, 2, 2, 2 };
-    MPI_Datatype types[5] = { MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE };
-    MPI_Datatype mpi_b_point_t;
-    MPI_Aint offsets[5] = {
-        offsetof(b_point, mass),
-        offsetof(b_point, vel) + offsetof(vec2, x),
-        offsetof(b_point, vel) + offsetof(vec2, y),
-        offsetof(b_point, pos) + offsetof(vec2, x),
-        offsetof(b_point, pos) + offsetof(vec2, y)
-    }; // Byte-wise displacements of each variables/block, measured in int-sized increments.
-
-    MPI_Type_create_struct(n_props, blocklengths, offsets, types, &mpi_b_point_t);
-    MPI_Type_commit(&mpi_b_point_t);
+    MPI_Datatype mpi_b_point_t = *get_mpi_b_point_type();
 
     // Acquire info about this process.
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
@@ -84,13 +70,7 @@ int main(int argc, const char **argv) {
 
     // Since slave processes wont have the arrays initialised, tell them to allocate the space.
     if (rank != 0) {
-        // int res = MPI_Alloc_mem(sizeof(b_point) * bodyCount, MPI_INFO_ENV, &points);
         points = malloc(sizeof(b_point) * bodyCount);
-
-        // if (res != MPI_SUCCESS) {
-        //     printf("Failed to allocate space for points.\n");
-        //     return 1;
-        // }
     }
 
     int result = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
@@ -101,20 +81,27 @@ int main(int argc, const char **argv) {
     }
 
     // Debug info.
-    // printf("Hello world from process %s with rank %d out of %d processors\n", hostname, rank, numtasks);
-    // printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, totalIterations);
-    // printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
+    printf("Hello world from process %s with rank %d out of %d processors\n", hostname, rank, numtasks);
+    printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, totalIterations);
+    printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
 
-    for(int i = 0; i < totalIterations; i++) {
+    loadNbodyPoints(numtasks, rank, points, bodyCount, time_delta);
+
+    // for(int i = 0; i < totalIterations; i++) {
         // Process the points.
-        ComputeForces(points, bodyCount, grav_constant, time_delta);
+        // ComputeForces(points, bodyCount, grav_constant, time_delta);
         
+        // print_points(points, bodyCount);
+
+        //Synchronise the points buffer across all nodes.
+        syncBodiesWithMaster(points);
+
         // Output the points (if we're on the master process).
-        if (rank == 0)
+        if (rank == 69)
         {
             save_points_iteration(points, bodyCount);
         }
-    }
+    // }
 
 
     // For some reason, running the below would cause one of the nodes to throw a segfault.

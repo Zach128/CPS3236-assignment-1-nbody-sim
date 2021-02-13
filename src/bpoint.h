@@ -1,6 +1,8 @@
 #ifndef BPOINT_H_
 #define BPOINT_H_
 
+#include <mpi.h>
+
 #include "vector2.h"
 
 #define MASS_RAND_MAX 10
@@ -15,6 +17,8 @@ typedef struct {
     vec2 pos;
 } body_point;
 typedef body_point b_point;
+
+MPI_Datatype *get_mpi_b_point_type();
 
 /**
  * Function: print_points
