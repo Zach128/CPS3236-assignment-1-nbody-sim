@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stddef.h>
 #include <mpi.h>
 
 #include "bpoint.h"
 
-MPI_Datatype mpi_type = NULL;
+MPI_Datatype mpi_type = 0;
 
 MPI_Datatype *get_mpi_b_point_type() {
-    if (mpi_type == NULL) {
+    if (mpi_type == 0) {
         // Register b_point type with mpi.
         const int n_props = 5;
         int blocklengths[5] = { 2, 2, 2, 2, 2 };

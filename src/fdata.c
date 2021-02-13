@@ -41,11 +41,12 @@ int count_lines(FILE *fptr) {
 }
 
 int load_points_from_file(b_point *points, const int count, FILE *fptr) {
+    int result = 0;
     int i = 0;
     
     // Load all the points by the expected pattern of mass, x, y.
     while(!feof(fptr)) {
-        fscanf(fptr, "%lf, %lf, %lf", &points[i].mass, &points[i].pos.x, &points[i].pos.y);
+        result = fscanf(fptr, "%lf, %lf, %lf", &points[i].mass, &points[i].pos.x, &points[i].pos.y);
         i++;
     }
 

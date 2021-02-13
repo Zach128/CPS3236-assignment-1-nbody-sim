@@ -69,7 +69,7 @@ void syncBodiesWithMaster(b_point *points)
 			sendBuff[i] = points[index_body_from + i];
 		}
 
-		printf("Rank %d: Sending %d elements with offset of %d\n", _rank, count, index_body_from, count);
+		printf("Rank %d: Sending %d elements with offset of %d\n", _rank, count, index_body_from);
 		MPI_Send(sendBuff, count, mpi_b_point_t, 0, 0, MPI_COMM_WORLD);
 	}
 	else

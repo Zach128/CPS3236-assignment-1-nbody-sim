@@ -112,7 +112,7 @@ int main(int argc, const char **argv) {
     //     // MPI_Free_mem(points);
     // }
 
-    MPI_Type_free(mpi_b_point_t);
+    MPI_Type_free(&mpi_b_point_t);
     MPI_Finalize();
     return 0;
 }
