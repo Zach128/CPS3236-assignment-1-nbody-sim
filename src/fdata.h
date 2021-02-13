@@ -59,6 +59,16 @@ int load_points_from_file(b_point *points, const int count, FILE *fptr);
  **/
 b_point *process_file(const char *path, int *point_count);
 
+/**
+ * Function: save_points_iteration
+ * ----------------------
+ * Save the points as an iteration to the file.
+ * The points are saved as-is assuming to be in the same order as when they were first read in.
+ * 
+ * points: The points array to save.
+ * point_count: The number of points in the array.
+ * 
+ **/
 void save_points_iteration(b_point *points, int point_count);
 
 #endif

@@ -18,6 +18,13 @@ typedef struct {
 } body_point;
 typedef body_point b_point;
 
+/**
+ * Function: get_mpi_b_point_type
+ * ------------------------------
+ * Generate and/or get an MPI-registered datatype for b_points.
+ * 
+ * returns: The address for the new type.
+ **/
 MPI_Datatype *get_mpi_b_point_type();
 
 /**
@@ -46,6 +53,14 @@ void print_points(b_point *points, const int count);
  **/
 void generate_rand_points(b_point *points, const int count);
 
+/**
+ * Function: print_point
+ * ------------------------------
+ * Print a given point.
+ * 
+ * point: The point to print.
+ * 
+ **/
 void print_point(b_point *point);
 
 #endif

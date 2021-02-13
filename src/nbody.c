@@ -6,10 +6,11 @@
 #include "vector2.h"
 #include "bpoint.h"
 
+// Type of the b_point struct.
 MPI_Datatype mpi_b_point_t;
-
+// Buffer for sending points to the master processor.
 b_point *point_send_buffer = NULL;
-
+// Prevent dupplicate initialisations.
 bool isInitialised = false;
 // How many processors are active.
 int total_nodes;
@@ -66,7 +67,6 @@ void syncBodiesWithMaster(b_point *points)
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (_rank != 0)
 	{
-
 		// If running in a slave processor, prepare a point buffer to send over with the relavant data.
 		for(int i = 0; i < count; i++)
 		{
@@ -102,7 +102,7 @@ void MoveBodies(b_point *bodies, int body_count, float time_delta)
 	vec2 buffer = { 0.f, 0.f };
 
 #ifdef USE_OMP
-	#pragma omp parallel for private(buffer), schedule(static, 8)
+	#pragma omp parallel for private(buffer), schedule(static)
 #endif
 	for (int i = index_body_from; i <= index_body_to; i++)
 	{
@@ -120,7 +120,7 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 	float distance;
 
 #ifdef USE_OMP
-	#pragma omp parallel for private(direction,force,acceleration,buffer, distance), schedule(static, 8)
+	#pragma omp parallel for private(direction,force,acceleration,buffer, distance), schedule(static)
 #endif
 		for (int j = index_body_from; j <= index_body_to; j++)
 		{
