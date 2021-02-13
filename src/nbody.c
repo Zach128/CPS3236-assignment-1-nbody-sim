@@ -59,18 +59,15 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 void syncBodiesWithMaster(b_point *points)
 {
 	b_point sendBuff[count];
-	b_point recvBuff[body_count];
-
-	// Prepare a point buffer to send over with the relavant data.
-	for(int i = 0; i < count; i++)
-	{
-		sendBuff[i] = points[index_body_from + i];
-	}
-
-	MPI_Gatherv(sendBuff, count, mpi_b_point_t, recvBuff, counts, index_froms, mpi_b_point_t, 0, MPI_COMM_WORLD);
 
 	if (_rank != 0)
 	{
+
+		// If running in a slave processor, prepare a point buffer to send over with the relavant data.
+		for(int i = 0; i < count; i++)
+		{
+			sendBuff[i] = points[index_body_from + i];
+		}
 
 		printf("Rank %d: Sending %d elements with offset of %d\n", _rank, count, index_body_from, count);
 		MPI_Send(sendBuff, count, mpi_b_point_t, 0, 0, MPI_COMM_WORLD);
@@ -89,6 +86,8 @@ void syncBodiesWithMaster(b_point *points)
 				points[index_froms[i] + recI] = recBuff[recI];
 			}
 		}
+
+		printf("Rank %d: Synchonised point data\n", _rank);
 	}
 
 	// int result = MPI_Allgatherv(sendBuff, count, mpi_b_point_t, recvBuff, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
