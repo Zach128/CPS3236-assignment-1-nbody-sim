@@ -1,8 +1,9 @@
 import threading
 import PySimpleGUI as sg
-
+from gifGen import GifGen
+from PIL import ImageGrab
 class NbodyPlayer:
-    def __init__(self, iterations, width, height, frameLength, loopMode):
+    def __init__(self, iterations, width, height, frameLength, loopMode, srcPath):
         self.iterations = iterations
         self.width = width
         self.height = height
@@ -17,6 +18,9 @@ class NbodyPlayer:
         self.graphTimer = None
 
         self.play = True
+        self.srcPath = srcPath
+
+        self.imager = GifGen(width, height)
 
     def initGraph(self):
         width = self.width
@@ -25,6 +29,7 @@ class NbodyPlayer:
         playerLayout = [
             [sg.Graph(key="canvas", canvas_size=(min(width, 1280), min(height, 720)), graph_bottom_left=(-width, -height), graph_top_right=(width, height), background_color="white")],
             [sg.Text("", key="play-time", size=(50, 1))],
+            [sg.Text("Rendering...", key="rendering", size=(50, 1))],
             [sg.Button(key="play-pause", button_text="Pause", enable_events=True)]
         ]
 
@@ -35,6 +40,10 @@ class NbodyPlayer:
 
         # Set the initial state of the playback text.
         self.updatePlaybackText()
+
+        self.imager.generateGif(self.srcPath, self.iterations, self.frameLength)
+        playerWindow["rendering"].update(f"Animation saved")
+
 
     def update(self):
 
@@ -79,7 +88,8 @@ class NbodyPlayer:
                 if self.closed:
                     break
 
-                graph.DrawCircle((body["x"], body["y"]), body["mass"], fill_color="black", line_color="blue")
+                if (body["x"] >= -self.width and body["x"] <= self.width) and (body["y"] >= -self.height and body["y"] <= self.height):
+                    graph.DrawCircle((body["x"], body["y"]), body["mass"], fill_color="black", line_color="blue")
             
             # Handle situation where window closed while updating.
             if self.closed:
@@ -95,8 +105,8 @@ class NbodyPlayer:
         
         # If we want to loop again, reset the frame counter and start over.
         if self.currIteration == self.totalIterations and self.loopMode:
-            self.currIteration = 0
-            self.updateGraph()
+                self.currIteration = 0
+                self.updateGraph()
 
     def updatePlaybackText(self):
         # Draw the playback text including elapsed time.

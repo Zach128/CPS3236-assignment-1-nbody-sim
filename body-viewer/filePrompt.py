@@ -88,7 +88,7 @@ class filePrompt:
                 if isSuccess:
                     filePrompt.close()
 
-                    return data, width, height, frameLength, loopMode
+                    return data, width, height, frameLength, loopMode, filePath
                 else:
                     isSuccess = True
     
