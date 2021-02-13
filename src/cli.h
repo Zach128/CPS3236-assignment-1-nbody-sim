@@ -14,6 +14,17 @@ struct _nbody_options {
 
 typedef struct _nbody_options cli_opt;
 
-cli_opt process_args(int argc, const char **argv);
+/**
+ * Function: process_args
+ * -------------------
+ * Take the string inputs from the command line and map them to our args object.
+ * 
+ * argc: The argc variable passed through main().
+ * argv: The argv variable passed through main().
+ * 
+ * returns: A cli_opt object containing all the parsed arguments.
+ * 
+ **/
+cli_opt process_args(int argc, char **argv);
 
 #endif

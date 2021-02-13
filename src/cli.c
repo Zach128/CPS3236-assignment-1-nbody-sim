@@ -18,7 +18,7 @@ cli_opt default_options = {
     0.005
 };
 
-cli_opt process_args(int argc, const char **argv) {
+cli_opt process_args(int argc, char **argv) {
     cli_opt nbody_options = default_options;
 
     struct argparse_option arg_options[] = {

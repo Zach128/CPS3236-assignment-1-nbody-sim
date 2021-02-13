@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fdata.h"
 #include "bpoint.h"
@@ -39,12 +40,13 @@ int count_lines(FILE *fptr) {
     return lines;
 }
 
-int load_points_from_file(const b_point *points, const int count, FILE *fptr) {
+int load_points_from_file(b_point *points, const int count, FILE *fptr) {
+    int result = 0;
     int i = 0;
     
     // Load all the points by the expected pattern of mass, x, y.
     while(!feof(fptr)) {
-        fscanf(fptr, "%lf, %lf, %lf", &points[i].mass, &points[i].pos.x, &points[i].pos.y);
+        result = fscanf(fptr, "%lf, %lf, %lf", &points[i].mass, &points[i].pos.x, &points[i].pos.y);
         i++;
     }
 
@@ -65,10 +67,10 @@ b_point *process_file(const char *path, int *point_count) {
     // Save the number of points found.
     *point_count = count_lines(fptr);
 
-    printf("Found points: %i\n", *point_count);
+    printf("Found points: %d\n", *point_count);
 
     // Allocate space for them, so we can return a pointer to this space.
-    b_point *points = malloc(*point_count * sizeof(b_point));
+    b_point *points = calloc(*point_count, sizeof(b_point));
 
     int load_result = load_points_from_file(points, *point_count, fptr);
 
