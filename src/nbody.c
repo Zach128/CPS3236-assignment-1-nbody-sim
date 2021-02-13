@@ -8,6 +8,8 @@
 
 MPI_Datatype mpi_b_point_t;
 
+b_point *point_send_buffer = NULL;
+
 bool isInitialised = false;
 // How many processors are active.
 int total_nodes;
@@ -44,14 +46,15 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 		index_body_from = body_count / totalNodes * rank;
 		index_body_to = rank == totalNodes - 1 ? body_count - 1 : body_count / totalNodes * (rank + 1) - 1;
 		count = index_body_to - index_body_from + 1;
-
-		printf("Rank %d shall process points from %d to %d\n", rank, index_body_from, index_body_to);
+		point_send_buffer = calloc(count, sizeof(b_point));
 
 		// Synchronize all computed chunk data across all points.
 		MPI_Allgather(&index_body_from, 1, MPI_INT, index_froms, 1, MPI_INT, MPI_COMM_WORLD);
 		MPI_Allgather(&index_body_to, 1, MPI_INT, index_tos, 1, MPI_INT, MPI_COMM_WORLD);
 		MPI_Allgather(&count, 1, MPI_INT, counts, 1, MPI_INT, MPI_COMM_WORLD);
 		
+		printf("Rank %d shall process points from %d to %d\n", rank, index_body_from, index_body_to);
+
 		isInitialised = true;
 	}
 }
@@ -60,6 +63,7 @@ void syncBodiesWithMaster(b_point *points)
 {
 	b_point sendBuff[count];
 
+	MPI_Barrier(MPI_COMM_WORLD);
 	if (_rank != 0)
 	{
 
@@ -69,7 +73,7 @@ void syncBodiesWithMaster(b_point *points)
 			sendBuff[i] = points[index_body_from + i];
 		}
 
-		printf("Rank %d: Sending %d elements with offset of %d\n", _rank, count, index_body_from);
+		// printf("Rank %d: Sending %d elements with offset of %d\n", _rank, count, index_body_from);
 		MPI_Send(sendBuff, count, mpi_b_point_t, 0, 0, MPI_COMM_WORLD);
 	}
 	else
@@ -87,7 +91,7 @@ void syncBodiesWithMaster(b_point *points)
 			}
 		}
 
-		printf("Rank %d: Synchonised point data\n", _rank);
+		// printf("Rank %d: Synchonised point data\n", _rank);
 	}
 
 	// int result = MPI_Allgatherv(sendBuff, count, mpi_b_point_t, recvBuff, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
@@ -100,7 +104,7 @@ void MoveBodies(b_point *bodies, int body_count, float time_delta)
 #ifdef USE_OMP
 	#pragma omp parallel for private(buffer), schedule(static, 8)
 #endif
-	for (int i = index_body_from; i < index_body_to; i++)
+	for (int i = index_body_from; i <= index_body_to; i++)
 	{
 		// bodies[i]->pos += bodies[i].vel * time_delta;
 		vec2Mulf(&bodies[i].vel, time_delta, &buffer);
@@ -118,14 +122,14 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 #ifdef USE_OMP
 	#pragma omp parallel for private(direction,force,acceleration,buffer, distance), schedule(static, 8)
 #endif
-		for (int j = index_body_from; j < index_body_to; ++j)
+		for (int j = index_body_from; j <= index_body_to; j++)
 		{
 			b_point *p1 = &bodies[j];
 		
 			force.x = acceleration.x = buffer.x = 0.f;
 			force.y = acceleration.y = buffer.y = 0.f;
 		
-			for (int k = 0; k < body_count; ++k)
+			for (int k = 0; k < body_count; k++)
 			{
 				if (k == j) continue;
 			

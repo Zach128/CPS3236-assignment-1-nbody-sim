@@ -7,7 +7,7 @@
 #include "bpoint.h"
 #include "nbody.h"
 
-int main(int argc, const char **argv) {
+int main(int argc, char **argv) {
     int  numtasks, rank, len, rc; 
     char hostname[MPI_MAX_PROCESSOR_NAME];
 
@@ -87,22 +87,32 @@ int main(int argc, const char **argv) {
 
     loadNbodyPoints(numtasks, rank, points, bodyCount, time_delta);
 
-    // for(int i = 0; i < totalIterations; i++) {
+    for(int i = 0; i < totalIterations; i++) {
+        int syncResult = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
+
+        if (syncResult != MPI_SUCCESS) {
+            printf("Failed to broadcast points in iteration %d\n", i);
+            return 1;
+        }
         // Process the points.
-        // ComputeForces(points, bodyCount, grav_constant, time_delta);
-        
-        // print_points(points, bodyCount);
+        ComputeForces(points, bodyCount, grav_constant, time_delta);
 
         //Synchronise the points buffer across all nodes.
         syncBodiesWithMaster(points);
 
         // Output the points (if we're on the master process).
-        if (rank == 69)
+        if (rank == 0)
         {
             save_points_iteration(points, bodyCount);
         }
-    // }
+    }
 
+    // MPI_Barrier(MPI_COMM_WORLD);
+    if (rank == 0)
+    {
+        printf("Simulation complete. Final body arrangement:\n");
+        print_points(points, bodyCount);
+    }
 
     // For some reason, running the below would cause one of the nodes to throw a segfault.
     // Clean up
@@ -112,7 +122,7 @@ int main(int argc, const char **argv) {
     //     // MPI_Free_mem(points);
     // }
 
-    MPI_Type_free(&mpi_b_point_t);
+    // MPI_Type_free(&mpi_b_point_t);
     MPI_Finalize();
     return 0;
 }
