@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <time.h>
 
 #include "cli.h"
 #include "fdata.h"
@@ -10,6 +11,7 @@
 int main(int argc, char **argv) {
     int  numtasks, rank, len, rc; 
     char hostname[MPI_MAX_PROCESSOR_NAME];
+    struct timespec tstart={0,0}, tend={0,0};
 
     // Prepare the MPI runtime
     rc = MPI_Init(&argc, &argv);
@@ -87,7 +89,12 @@ int main(int argc, char **argv) {
 
     loadNbodyPoints(numtasks, rank, points, bodyCount, time_delta);
 
-    for(int i = 0; i < totalIterations; i++) {
+    // Get the start time of the calculation.
+    if (rank == 0) {
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
+    }
+
+    for (int i = 0; i < totalIterations; i++) {
         int syncResult = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
 
         if (syncResult != MPI_SUCCESS) {
@@ -108,10 +115,15 @@ int main(int argc, char **argv) {
     }
 
     // MPI_Barrier(MPI_COMM_WORLD);
-    if (rank == 0 && args.output)
+    if (rank == 0)
     {
         printf("Simulation complete. Final body arrangement:\n");
         print_points(points, bodyCount);
+        // Get the end-time and print the duration of the simulation.
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+        printf("Nbody simulation took about %.5f seconds\n",
+           ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
+           ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
     }
 
     // For some reason, running the below would cause one of the nodes to throw a segfault.
