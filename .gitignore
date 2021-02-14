@@ -41,6 +41,7 @@ res/ref
 # Output files
 res/out
 res/out_backup
+*.gif
 
 # Python compiled files
 *.pyc
