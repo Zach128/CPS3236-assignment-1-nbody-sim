@@ -1,3 +1,4 @@
+import re
 import os.path
 from os import path
 
@@ -8,7 +9,7 @@ class filePrompt:
         # Components of the file prompter.
         filePromptMain = [
             [sg.Text("Select an input file to open")],
-            [sg.In(key="file-path", enable_events=True), sg.FileBrowse()],
+            [sg.In(key="file-path", enable_events=True), sg.FolderBrowse()],
             [
                 sg.Text("Width: "),
                 sg.Input(key="width", size=(10, 1), default_text="500", enable_events=True),
@@ -38,7 +39,7 @@ class filePrompt:
             # Handle the submit event and form validation.
             if event == "submit":
                 # Check if the path exists.
-                if filePath and path.exists(filePath) and path.isfile(filePath):
+                if filePath and path.exists(filePath) and path.isdir(filePath):
                     data = self.loadPoints(filePath)
                 else:
                     # Print an error if the file doesn't exist.
@@ -92,34 +93,33 @@ class filePrompt:
                 else:
                     isSuccess = True
     
-    def loadPoints(self, filePath):
-        pointFile = open(filePath, "r")
+    def loadPoints(self, inDir):
+        # Lambda function for getting the iteration suffix in an iteration file.
+        iterationKey = lambda text: [
+            # Get the number as a digit.
+            int(num) if num.isdigit() else num
+            # Get the last digit (iteration number) in the file.
+            for num in re.split(r'(\d+)(?!.*\d)', text)
+        ]
+        
         pointCount = iterationCount = 0
         allPoints = []
         iterations = []
 
-        # Try read the number of points in the file.
-        try:
-            pointCount = int(pointFile.readline())
-        except:
-            raise Exception("Failed to read the file header. Invalid file. Expected format \"%d\\n\"")
+        # Read all the points in the file.
+        files = [f.path for f in os.scandir(inDir) if f.is_file]
+        files.sort(key=iterationKey)
 
-        for line in pointFile:
-            # Parse the mass, x and y coordinates into floats
-            m, x, y = [float(val) for val in line.split()]
-            allPoints.append({ "mass": m, "x": x, "y": y })
+        for f in files:
+            with open(f, "r") as pointFile:
+                allPoints = []
+                for line in pointFile:
+                    # Parse the mass, x and y coordinates into floats
+                    m, x, y = [float(val) for val in line.split()]
+                    allPoints.append({ "mass": m, "x": x, "y": y })
+                iterations.append(allPoints)
 
-        # Get the number of iterations
-        iterationCount = int(len(allPoints) / pointCount)
-        # Initialise an empty 2d array iterationCount x pointCount in size.
-        iterations = [[0] * pointCount for _ in range(iterationCount)]
-        
-        for i, point in enumerate(allPoints):
-            pointIndex = i % pointCount
-            iterationIndex = i // pointCount
-            iterations[iterationIndex][pointIndex] = point
-
-        # We're finished. Close the file.
-        pointFile.close()
+        iterationCount = len(files)
+        pointCount = len(iterations[0])
 
         return iterations

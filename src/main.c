@@ -43,8 +43,11 @@ int main(int argc, char **argv) {
             int point_count;
             b_point *file_points = process_file(args.file_path, &point_count);
 
-            printf("Loaded file points:\n");
-            print_points(file_points, point_count);
+            if (args.output)
+            {
+                printf("Loaded file points:\n");
+                print_points(file_points, point_count);
+            }
 
             points = file_points;
             bodyCount = point_count;
@@ -57,9 +60,6 @@ int main(int argc, char **argv) {
             points = rand_points;
             bodyCount = num_points;
         }
-        
-        // Initialise a new file first.
-        create_new_file(bodyCount);
     }
 
     // Synchronise data across nodes.
@@ -101,14 +101,14 @@ int main(int argc, char **argv) {
         syncBodiesWithMaster(points);
 
         // Output the points (if we're on the master process).
-        if (rank == 0)
+        if (rank == 0 && args.output)
         {
-            save_points_iteration(points, bodyCount);
+            save_points_iteration(points, bodyCount, i + 1);
         }
     }
 
     // MPI_Barrier(MPI_COMM_WORLD);
-    if (rank == 0)
+    if (rank == 0 && args.output)
     {
         printf("Simulation complete. Final body arrangement:\n");
         print_points(points, bodyCount);

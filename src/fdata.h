@@ -4,22 +4,6 @@
 #include "bpoint.h"
 
 /**
- * Function: open_read_file
- * -------------------
- * Read a file at the given file path. Can be a relative or absolute path.
- * 
- * path: Relative or absolute string file path to the file to load.
- * 
- * returns: 0 if successful, -1 if unsuccessful.
- * 
- **/
-FILE *open_read_file(const char *path);
-
-FILE *open_write_file(const char *path);
-
-void create_new_file(int point_count);
-
-/**
  * Function: count_lines
  * ---------------------
  * Count the lines in a file. Used for checking how many points need to be loaded.
@@ -69,6 +53,6 @@ b_point *process_file(const char *path, int *point_count);
  * point_count: The number of points in the array.
  * 
  **/
-void save_points_iteration(b_point *points, int point_count);
+void save_points_iteration(b_point *points, int point_count, int iteration);
 
 #endif
