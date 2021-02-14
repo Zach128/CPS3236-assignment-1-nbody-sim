@@ -40,6 +40,7 @@ res/ref
 
 # Output files
 res/out
+res/out_backup
 
 # Python compiled files
 *.pyc

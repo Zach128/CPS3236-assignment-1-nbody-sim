@@ -60,9 +60,6 @@ int main(int argc, char **argv) {
             points = rand_points;
             bodyCount = num_points;
         }
-        
-        // Initialise a new file first.
-        create_new_file(bodyCount);
     }
 
     // Synchronise data across nodes.
@@ -106,7 +103,7 @@ int main(int argc, char **argv) {
         // Output the points (if we're on the master process).
         if (rank == 0 && args.output)
         {
-            save_points_iteration(points, bodyCount);
+            save_points_iteration(points, bodyCount, i + 1);
         }
     }
 

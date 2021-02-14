@@ -19,14 +19,6 @@ FILE *open_file(const char *path, const char *mode) {
     return fptr;
 }
 
-FILE *open_read_file(const char *path) {
-    return open_file(path, "r");
-}
-
-FILE *open_write_file(const char *path) {
-    return open_file(path, "w");
-}
-
 int count_lines(FILE *fptr) {
     int lines = 0;
 
@@ -62,7 +54,7 @@ int load_points_from_file(b_point *points, const int count, FILE *fptr) {
 }
 
 b_point *process_file(const char *path, int *point_count) {
-    FILE *fptr = open_read_file(path);
+    FILE *fptr = open_file(path, "r");
 
     // Save the number of points found.
     *point_count = count_lines(fptr);
@@ -84,33 +76,16 @@ b_point *process_file(const char *path, int *point_count) {
     return points;
 }
 
-void create_new_file(int point_count) {
-    char buffer[128];
-    char filepath[32768];
-
-    // Create the file path.
-    snprintf(buffer, 128, "nbody_%d.txt", point_count);
-    strcpy(filepath, out_path);
-    strcat(filepath, buffer);
-
-    FILE *file = open_write_file(filepath);
-
-    // Save a header containing the number of points to load.
-    fprintf(file, "%d\n", point_count);
-    fclose(file);
-}
-
-void save_points_iteration(b_point *points, int point_count)
+void save_points_iteration(b_point *points, int point_count, int iteration)
 {
     char buffer[128];
     char filepath[32768];
 
     // Create the file path.
-    snprintf(buffer, 128, "nbody_%d.txt", point_count);
-    strcpy(filepath, out_path);
-    strcat(filepath, buffer);
+    snprintf(buffer, 128, "nbody_%d.txt", iteration);
+    strcat(strcpy(filepath, out_path), buffer);
 
-    FILE *file = open_file(filepath, "a+");
+    FILE *file = open_file(filepath, "w");
 
     double m, x, y;
 
