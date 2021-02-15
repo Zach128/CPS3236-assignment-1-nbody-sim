@@ -34,11 +34,11 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 	// we don't want to run this more than once.
 	if (!isInitialised)
 	{
-		index_froms = malloc(sizeof(int) * totalNodes);
-		index_tos = malloc(sizeof(int) * totalNodes);
-		counts = malloc(sizeof(int) * totalNodes);
+		index_froms = calloc(totalNodes, sizeof(int));
+		index_tos = calloc(totalNodes, sizeof(int));
+		counts = calloc(totalNodes, sizeof(int));
 
-		mpi_b_point_t = *get_mpi_b_point_type();
+		mpi_b_point_t = get_mpi_b_point_type();
 
 		total_nodes = totalNodes;
 		_rank = rank;
@@ -62,7 +62,7 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 
 void syncBodiesWithMaster(b_point *points)
 {
-	b_point sendBuff[count];
+	b_point *sendBuff = malloc(count * sizeof(b_point));
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (_rank != 0)
@@ -81,19 +81,21 @@ void syncBodiesWithMaster(b_point *points)
 		// If running in the master processor, begin gathering all the new point data submitted by the slave processors.
 		for(int i = 1; i < total_nodes; i++)
 		{
-			b_point recBuff[counts[i]];
-			MPI_Recv(recBuff, counts[i], mpi_b_point_t, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			b_point *recBuff = malloc(counts[i] * sizeof(b_point));
+
+			MPI_Recv(&recBuff[0], counts[i], mpi_b_point_t, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			
 			// Write the new data to the points array.
 			for(int recI = 0; recI < counts[i]; recI++)
 			{
 				points[index_froms[i] + recI] = recBuff[recI];
 			}
-		}
 
-		// printf("Rank %d: Synchonised point data\n", _rank);
+			free(recBuff);
+		}
 	}
 
+	free(sendBuff);
 	// int result = MPI_Allgatherv(sendBuff, count, mpi_b_point_t, recvBuff, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
 }
 

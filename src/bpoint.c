@@ -8,7 +8,7 @@
 
 MPI_Datatype mpi_type = 0;
 
-MPI_Datatype *get_mpi_b_point_type() {
+MPI_Datatype get_mpi_b_point_type() {
     if (mpi_type == 0) {
         // Register b_point type with mpi.
         const int n_props = 5;
@@ -25,9 +25,9 @@ MPI_Datatype *get_mpi_b_point_type() {
         MPI_Type_create_struct(n_props, blocklengths, offsets, types, &mpi_type);
         MPI_Type_commit(&mpi_type);
 
-        return &mpi_type;
+        return mpi_type;
     } else {
-        return &mpi_type;
+        return mpi_type;
     }
 }
 

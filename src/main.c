@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    MPI_Datatype mpi_b_point_t = *get_mpi_b_point_type();
+    MPI_Datatype mpi_b_point_t = get_mpi_b_point_type();
 
     // Acquire info about this process.
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
     // Since slave processes wont have the arrays initialised, tell them to allocate the space.
     if (rank != 0) {
-        points = malloc(sizeof(b_point) * bodyCount);
+        points = calloc(bodyCount, sizeof(b_point));
     }
 
     int result = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);

@@ -23,9 +23,9 @@ typedef body_point b_point;
  * ------------------------------
  * Generate and/or get an MPI-registered datatype for b_points.
  * 
- * returns: The address for the new type.
+ * returns: The new type.
  **/
-MPI_Datatype *get_mpi_b_point_type();
+MPI_Datatype get_mpi_b_point_type();
 
 /**
  * Function: print_points
