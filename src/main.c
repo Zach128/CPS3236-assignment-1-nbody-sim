@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include <time.h>
+#ifdef DEBUG_MODE
+#include <unistd.h>
+#endif
 
 #include "cli.h"
 #include "fdata.h"
@@ -9,9 +12,19 @@
 #include "nbody.h"
 
 int main(int argc, char **argv) {
-    int  numtasks, rank, len, rc; 
+    int  numtasks, rank, len, rc;
     char hostname[MPI_MAX_PROCESSOR_NAME];
     struct timespec tstart={0,0}, tend={0,0};
+
+#ifdef DEBUG_MODE
+    {
+        int z = 0;
+        while (z == 0)
+        {
+            sleep(5);
+        }
+    }
+#endif
 
     // Prepare the MPI runtime
     rc = MPI_Init(&argc, &argv);
@@ -75,6 +88,7 @@ int main(int argc, char **argv) {
         points = calloc(bodyCount, sizeof(b_point));
     }
 
+    MPI_Barrier(MPI_COMM_WORLD);
     int result = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
 
     if (result != MPI_SUCCESS) {

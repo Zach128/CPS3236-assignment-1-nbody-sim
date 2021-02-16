@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h> 
 
 #include "vector2.h"
@@ -68,10 +69,11 @@ void syncBodiesWithMaster(b_point *points)
 	if (_rank != 0)
 	{
 		// If running in a slave processor, prepare a point buffer to send over with the relavant data.
-		for(int i = 0; i < count; i++)
-		{
-			sendBuff[i] = points[index_body_from + i];
-		}
+		memcpy(sendBuff, &points[index_body_from], count);
+		// for(int i = 0; i < count; i++)
+		// {
+		// 	sendBuff[i] = points[index_body_from + i];
+		// }
 
 		// printf("Rank %d: Sending %d elements with offset of %d\n", _rank, count, index_body_from);
 		MPI_Send(sendBuff, count, mpi_b_point_t, 0, 0, MPI_COMM_WORLD);
@@ -83,13 +85,14 @@ void syncBodiesWithMaster(b_point *points)
 		{
 			b_point *recBuff = malloc(counts[i] * sizeof(b_point));
 
-			MPI_Recv(&recBuff[0], counts[i], mpi_b_point_t, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(recBuff, counts[i], mpi_b_point_t, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			
 			// Write the new data to the points array.
-			for(int recI = 0; recI < counts[i]; recI++)
-			{
-				points[index_froms[i] + recI] = recBuff[recI];
-			}
+			memcpy(&points[index_froms[i]], recBuff, counts[i]);
+			// for(int recI = 0; recI < counts[i]; recI++)
+			// {
+			// 	points[index_froms[i] + recI] = recBuff[recI];
+			// }
 
 			free(recBuff);
 		}
