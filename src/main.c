@@ -88,7 +88,6 @@ int main(int argc, char **argv) {
         points = calloc(bodyCount, sizeof(b_point));
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
     int result = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
 
     if (result != MPI_SUCCESS) {
@@ -109,17 +108,11 @@ int main(int argc, char **argv) {
     }
 
     for (int i = 0; i < totalIterations; i++) {
-        int syncResult = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
-
-        if (syncResult != MPI_SUCCESS) {
-            printf("Failed to broadcast points in iteration %d\n", i);
-            return 1;
-        }
         // Process the points.
         ComputeForces(points, bodyCount, grav_constant, time_delta);
 
-        //Synchronise the points buffer across all nodes.
-        syncBodiesWithMaster(points);
+        //Synchronise the points buffer across all ranks.
+        syncBodiesAcrossRanks(points);
 
         // Output the points (if we're on the master process).
         if (rank == 0 && args.output)
@@ -128,7 +121,6 @@ int main(int argc, char **argv) {
         }
     }
 
-    // MPI_Barrier(MPI_COMM_WORLD);
     if (rank == 0)
     {
         printf("Simulation complete. Final body arrangement:\n");
@@ -142,13 +134,10 @@ int main(int argc, char **argv) {
 
     // For some reason, running the below would cause one of the nodes to throw a segfault.
     // Clean up
-    // if (rank != 0) {
-    //     printf("Cleaning up\n");
-    //     free(points);
-    //     // MPI_Free_mem(points);
-    // }
+    printf("Cleaning up\n");
+    free(points);
 
-    // MPI_Type_free(&mpi_b_point_t);
+    MPI_Type_free(&mpi_b_point_t);
     MPI_Finalize();
     return 0;
 }

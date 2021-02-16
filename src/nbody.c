@@ -61,45 +61,21 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 	}
 }
 
-void syncBodiesWithMaster(b_point *points)
+void syncBodiesAcrossRanks(b_point *points)
 {
 	b_point *sendBuff = malloc(count * sizeof(b_point));
 
-	MPI_Barrier(MPI_COMM_WORLD);
-	if (_rank != 0)
+	// Prepare a buffer with this ranks points to be sent.
+	for(int i = 0; i < count; i++)
 	{
-		// If running in a slave processor, prepare a point buffer to send over with the relavant data.
-		memcpy(sendBuff, &points[index_body_from], count);
-		// for(int i = 0; i < count; i++)
-		// {
-		// 	sendBuff[i] = points[index_body_from + i];
-		// }
-
-		// printf("Rank %d: Sending %d elements with offset of %d\n", _rank, count, index_body_from);
-		MPI_Send(sendBuff, count, mpi_b_point_t, 0, 0, MPI_COMM_WORLD);
-	}
-	else
-	{
-		// If running in the master processor, begin gathering all the new point data submitted by the slave processors.
-		for(int i = 1; i < total_nodes; i++)
-		{
-			b_point *recBuff = malloc(counts[i] * sizeof(b_point));
-
-			MPI_Recv(recBuff, counts[i], mpi_b_point_t, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			
-			// Write the new data to the points array.
-			memcpy(&points[index_froms[i]], recBuff, counts[i]);
-			// for(int recI = 0; recI < counts[i]; recI++)
-			// {
-			// 	points[index_froms[i] + recI] = recBuff[recI];
-			// }
-
-			free(recBuff);
-		}
+		sendBuff[i] = points[index_body_from + i];
 	}
 
+	// Dispatch the data, writing it back to the points array.
+	// Location in the array and how much to receive is determined by the sending rank.
+	MPI_Allgatherv(sendBuff, count, mpi_b_point_t, points, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
+	
 	free(sendBuff);
-	// int result = MPI_Allgatherv(sendBuff, count, mpi_b_point_t, recvBuff, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
 }
 
 void MoveBodies(b_point *bodies, int body_count, float time_delta)
