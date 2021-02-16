@@ -63,7 +63,8 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 
 void syncBodiesAcrossRanks(b_point *points)
 {
-	b_point *sendBuff = malloc(count * sizeof(b_point));
+	b_point *sendBuff;
+	MPI_Alloc_mem(count * sizeof(b_point), MPI_INFO_NULL, &sendBuff);
 
 	// Prepare a buffer with this ranks points to be sent.
 	for(int i = 0; i < count; i++)
@@ -75,7 +76,7 @@ void syncBodiesAcrossRanks(b_point *points)
 	// Location in the array and how much to receive is determined by the sending rank.
 	MPI_Allgatherv(sendBuff, count, mpi_b_point_t, points, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
 	
-	free(sendBuff);
+	MPI_Free_mem(sendBuff);
 }
 
 void MoveBodies(b_point *bodies, int body_count, float time_delta)

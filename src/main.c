@@ -68,11 +68,10 @@ int main(int argc, char **argv) {
             bodyCount = point_count;
         } else if (args.num_particles > 0) {
             int num_points = args.num_particles;
-            b_point *rand_points = malloc(num_points * sizeof(b_point));
+            MPI_Alloc_mem(num_points * sizeof(b_point), MPI_INFO_NULL, &points);
 
-            generate_rand_points(rand_points, num_points);
+            generate_rand_points(points, num_points);
             printf("Generated %d points.\n", num_points);
-            points = rand_points;
             bodyCount = num_points;
         }
     }
@@ -135,7 +134,7 @@ int main(int argc, char **argv) {
     // For some reason, running the below would cause one of the nodes to throw a segfault.
     // Clean up
     printf("Cleaning up\n");
-    free(points);
+    MPI_Free_mem(points);
 
     MPI_Type_free(&mpi_b_point_t);
     MPI_Finalize();
