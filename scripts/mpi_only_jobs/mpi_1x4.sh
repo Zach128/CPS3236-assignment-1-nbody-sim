@@ -23,4 +23,4 @@ module add shared openmpi/gcc/64/1.8.8
 echo $PE_HOSTFILE
 
 # Run your application
-mpirun ./nbody.out -f res/data/input_1024.txt -i 1000 -o false
+mpirun --map-by ppr:1:node ./nbody.out -f res/data/input_1024.txt -i 1000 -o false
