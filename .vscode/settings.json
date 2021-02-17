@@ -43,6 +43,10 @@
         "sstream": "c",
         "stdexcept": "c",
         "streambuf": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "argparse.h": "c",
+        "string.h": "c",
+        "cli.h": "c",
+        "unistd.h": "c"
     }
 }

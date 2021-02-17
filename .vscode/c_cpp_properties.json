@@ -4,11 +4,10 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/local/lib/",
-                "/opt/ohpc/pub/mpi/openmpi4-gnu9/4.0.4/include/"
+                "/usr/local/lib/"
             ],
             "defines": [],
-            "compilerPath": "/opt/ohpc/pub/compiler/gcc/9.3.0/bin/gcc",
+            "compilerPath": "/usr/bin/mpicc",
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
             "intelliSenseMode": "gcc-x64"

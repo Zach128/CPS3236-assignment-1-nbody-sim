@@ -5,17 +5,35 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(mpi) Nbody with file",
+            "name": "Just attach",
             "type": "cppdbg",
             "request": "attach",
             "processId": "${command:pickProcess}",
-            "program": "/opt/ohpc/pub/mpi/openmpi4-gnu9/4.0.4/bin/mpirun",
+            "program": "${workspaceFolder}/nbody.out",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "(mpi) Nbody with file",
+            "type": "cppdbg",
+            "request": "launch",
+            // "request": "attach",
+            // "processId": "${command:pickProcess}",
+            "program": "/usr/bin/mpirun",
             "args": [
                 "-np",
-                "2",
-                "nbody.out",
-                "-f",
-                "res/data/input_64.txt"
+                "1",
+                "./nbody.out",
+                "-p",
+                "4"
+                // "res/data/input_64.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
