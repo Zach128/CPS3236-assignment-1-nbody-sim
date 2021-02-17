@@ -8,6 +8,7 @@
 #include "nbody.h"
 #include "bpoint.h"
 #include "quad.h"
+#include "barnes.h"
 
 // Type of the b_point struct.
 MPI_Datatype mpi_b_point_t;
@@ -93,15 +94,48 @@ void MoveBodies(b_point *bodies, int body_count, float time_delta)
 	}
 }
 
+void get_force(b_point *target, vec2 *src, double srcMass, vec2 *out)
+{
+	float distance;
+	vec2 direction;
+
+	// Compute direction vector.
+	direction.x = src->x - target->pos.x;
+	direction.y = src->y - target->pos.y;
+
+	// Calculate the length of the computed direction.
+	double direction_length = vec2Length(&direction);
+	
+	// Limit distance term to avoid singularities.
+	// distance = std::max<float>( 0.5f * (p2.Mass + p1.Mass), fabs(direction.Length()) );
+	distance = 0.5f * (srcMass + target->mass);
+	distance = distance >= direction_length ? distance : direction_length;
+	
+	// Accumulate force. Follows the below calculation
+	// force += direction / (distance * distance * distance) * p2->mass; 
+	vec2Divf(&direction, (distance * distance * distance), out);
+	vec2Mulf(out, srcMass, out);
+}
+
+void compute_velocity(b_point *target, vec2 *force, float grav_constant, float time_delta)
+{
+	vec2 acceleration, buffer;
+
+	// Compute acceleration for body.
+	// acceleration = force * p_gravitationalTerm;
+	vec2Mulf(force, grav_constant, &acceleration);
+
+	// Integrate velocity (m/s).
+	// p1.Velocity += acceleration * p_deltaT;
+	vec2Addvec2(&target->vel, vec2Mulf(&acceleration, time_delta, &buffer), &target->vel);
+}
+
 void ComputeForces(b_point *bodies, int body_count, float grav_constant, float time_delta)
 {
-	vec2 direction,
-		force, acceleration, buffer;
-
-	float distance;
+	vec2 force, acceleration, buffer;
 
 #ifdef USE_OMP
-	#pragma omp parallel for private(direction,force,acceleration,buffer, distance), schedule(static)
+	#pragma omp parallel for private(force,acceleration,buffer), schedule(static)
 #endif
 		for (int j = index_body_from; j <= index_body_to; j++)
 		{
@@ -113,43 +147,75 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 			for (int k = 0; k < body_count; k++)
 			{
 				if (k == j) continue;
-			
+
 				b_point *p2 = &bodies[k];
 				
-				// Compute direction vector.
-				direction.x = p2->pos.x - p1->pos.x;
-				direction.y = p2->pos.y - p1->pos.y;
-
-				// Calculate the length of the computed direction.
-				double direction_length = vec2Length(&direction);
-				
-				// Limit distance term to avoid singularities.
-				// distance = std::max<float>( 0.5f * (p2.Mass + p1.Mass), fabs(direction.Length()) );
-				distance = 0.5f * (p2->mass + p1->mass);
-				distance = distance >= direction_length ? distance : direction_length;
-				
-				// Accumulate force. Follows the below calculation
-				// force += direction / (distance * distance * distance) * p2->mass; 
-				vec2Divf(&direction, (distance * distance * distance), &force);
-				vec2Mulf(&force, p2->mass, &force);
+				get_force(p1, &p2->pos, p2->mass, &force);
 			}
-					
-			// Compute acceleration for body.
-			// acceleration = force * p_gravitationalTerm;
-			vec2Mulf(&force, grav_constant, &acceleration);
 
-			// Integrate velocity (m/s).
-			// p1.Velocity += acceleration * p_deltaT;
-			vec2Addvec2(&p1->vel, vec2Mulf(&acceleration, time_delta, &buffer), &p1->vel);
+			compute_velocity(p1, &force, grav_constant, time_delta);
 		}
 
 	MoveBodies(bodies, body_count, time_delta);
 
 }
 
-void BarnesComputeForces(b_point *points, int bodyCount)
+bool is_node_close_enough(b_point *target, b_node *tree)
 {
+	vec2 fullSize = { .x = tree->boundary.half_size.x * 2, .y = tree->boundary.half_size.y * 2 };
+	vec2 d = { .x = fabs(target->pos.x - tree->center_of_mass.v.x), .y = fabs(target->pos.y - tree->center_of_mass.v.y) };
+	double s = (fullSize.x + fullSize.y) / 2;
+	double qoutient = s / vec2Length(&d);
+
+	return qoutient > BARNES_NODE_DIST_TITA;
+}
+
+void barnesComputeForce(b_point *target, b_node *tree, vec2 *force)
+{
+	for (int i = 0; i < tree->child_count; i++)
+	{
+		if (tree->children[i] != NULL)
+		{
+			// If there are child nodes, first check if it's close enough from the target point.
+			if (!is_node_close_enough(target, tree->children[i]))
+			{
+				// If it's close enough, we recursively iterate over the child node.
+				barnesComputeForce(target, tree->children[i], force);
+			}
+			else
+			{
+				// Otherwise
+				get_force(target, &tree->children[i]->center_of_mass.v, tree->children[i]->center_of_mass.m, force);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < tree->child_count; i++)
+			{
+				if (target == tree->points[i]) continue;
+
+				get_force(target, &tree->points[i]->pos, tree->points[i]->mass, force);
+			}
+		}
+	}
+}
+
+void BarnesMain(b_point *points, int bodyCount, float grav_constant, float time_delta)
+{
+
 	b_node *tree = tree_from_points(points, bodyCount);
+
+	for(int i = 0; i < bodyCount; i++)
+	{
+		vec2 force;
+		barnesComputeForce(&points[i], tree, &force);
+
+		compute_velocity(&points[i], &force, grav_constant, time_delta);
+	}
+
+	MoveBodies(points, body_count, time_delta);
+
+	// print_point(&points[0]);
 
 	free_node(tree);
 }

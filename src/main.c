@@ -107,21 +107,32 @@ int main(int argc, char **argv) {
         clock_gettime(CLOCK_MONOTONIC, &tstart);
     }
 
-    BarnesComputeForces(points, bodyCount);
-
     for (int i = 0; i < totalIterations; i++) {
-        // Process the points.
-        ComputeForces(points, bodyCount, grav_constant, time_delta);
+        if (i == 23)
+        {
+            printf("Here\n");
+        }
+        BarnesMain(points, bodyCount, grav_constant, time_delta);
 
-        //Synchronise the points buffer across all ranks.
-        syncBodiesAcrossRanks(points);
-
-        // Output the points (if we're on the master process).
         if (rank == 0 && args.output)
         {
             save_points_iteration(points, bodyCount, i + 1);
         }
     }
+
+    // for (int i = 0; i < totalIterations; i++) {
+    //     // Process the points.
+    //     ComputeForces(points, bodyCount, grav_constant, time_delta);
+
+    //     //Synchronise the points buffer across all ranks.
+    //     syncBodiesAcrossRanks(points);
+
+    //     // Output the points (if we're on the master process).
+    //     if (rank == 0 && args.output)
+    //     {
+    //         save_points_iteration(points, bodyCount, i + 1);
+    //     }
+    // }
 
     if (rank == 0)
     {

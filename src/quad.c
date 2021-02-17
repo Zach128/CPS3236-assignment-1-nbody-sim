@@ -14,8 +14,7 @@ b_node *init_empty_node()
         .points = { NULL, NULL, NULL, NULL },
         .child_count = 0,
         .parent = NULL,
-        .mass = 0,
-        .center_of_mass = { 0, 0 },
+        .center_of_mass = { .m = 0, .v = { 0, 0 } },
         .boundary = { { 0, 0 }, { 0, 0} }
     };
 
@@ -208,14 +207,51 @@ bool insert(b_point *point, b_node *root_node)
     return false;
 }
 
+void compute_masses(b_node *tree)
+{
+    // Pointer to tree's CoM for readability.
+    mvec2 *com = &tree->center_of_mass;
+
+    // If we only have points, calculate the center with those points.
+    if (tree->children[0] == NULL)
+    {
+        for(int i = 0; i < tree->child_count; i++)
+        {
+            com->m += tree->points[i]->mass;
+            com->v.x += tree->points[i]->pos.x * tree->points[i]->mass;
+            com->v.y += tree->points[i]->pos.y * tree->points[i]->mass;
+        }
+    }
+    // Otherwise, recursively calculate each node's CoM first
+    else
+    {
+        for(int i = 0; i < BARNES_MAX_NODES; i++)
+        {
+            if (tree->children[i]->child_count != 0)
+                compute_masses(tree->children[i]);
+
+            com->m += tree->children[i]->center_of_mass.m;
+            com->v.x += tree->children[i]->center_of_mass.v.x * tree->children[i]->center_of_mass.m;
+            com->v.y += tree->children[i]->center_of_mass.v.y * tree->children[i]->center_of_mass.m;
+        }
+    }
+
+    com->v.x /= com->m;
+    com->v.y /= com->m;
+}
+
 b_node *tree_from_points(b_point *points, int bodyCount)
 {
     b_node *tree = create_root_node(points, bodyCount);
 
+    // First construct the tree structure itself.
 	for(int i = 0; i < bodyCount; i++)
 	{
 		insert(&(points[i]), tree);
 	}
+
+    // Next, calculate each quadrants center of mass.
+    compute_masses(tree);
 
     return tree;
 }

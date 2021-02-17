@@ -49,6 +49,7 @@
         "cli.h": "c",
         "unistd.h": "c",
         "stdbool.h": "c",
-        "bpoint.h": "c"
+        "bpoint.h": "c",
+        "stdio.h": "c"
     }
 }

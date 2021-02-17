@@ -1,9 +1,11 @@
 #ifndef QUAD_H_
 #define QUAD_H_
+#include <stdbool.h>
 
 #include "vector2.h"
 #include "bpoint.h"
 
+#define BARNES_NODE_DIST_TITA 0.5
 #define BARNES_MAX_NODES 4
 
 typedef struct aabb {
@@ -16,8 +18,7 @@ typedef struct b_node {
     // 0 = nw, 1 = ne, 2 = sw, 3 = se
     b_point *points[BARNES_MAX_NODES];
     struct b_node *children[BARNES_MAX_NODES];
-    vec2 center_of_mass;
-    double mass;
+    mvec2 center_of_mass;
     int child_count;
     aabb boundary;
     struct b_node *parent;
