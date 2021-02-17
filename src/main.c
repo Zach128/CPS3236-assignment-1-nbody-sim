@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include <time.h>
-#ifdef DEBUG_MODE
+#ifdef DEBUG_MODE_MPI
 #include <unistd.h>
 #endif
 
@@ -10,13 +10,14 @@
 #include "fdata.h"
 #include "bpoint.h"
 #include "nbody.h"
+#include "quad.h"
 
 int main(int argc, char **argv) {
     int  numtasks, rank, len, rc;
     char hostname[MPI_MAX_PROCESSOR_NAME];
     struct timespec tstart={0,0}, tend={0,0};
 
-#ifdef DEBUG_MODE
+#ifdef DEBUG_MODE_MPI
     {
         int z = 0;
         while (z == 0)
@@ -105,6 +106,14 @@ int main(int argc, char **argv) {
     if (rank == 0) {
         clock_gettime(CLOCK_MONOTONIC, &tstart);
     }
+
+    // b_node *root = create_root_node(points, bodyCount);
+
+    // insert(&points[0], root);
+    // insert(&points[1], root);
+    // insert(&points[2], root);
+    // insert(&points[3], root);
+    // insert(&points[4], root);
 
     for (int i = 0; i < totalIterations; i++) {
         // Process the points.

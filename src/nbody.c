@@ -5,12 +5,11 @@
 #include <stdbool.h> 
 
 #include "vector2.h"
+#include "nbody.h"
 #include "bpoint.h"
 
 // Type of the b_point struct.
 MPI_Datatype mpi_b_point_t;
-// Buffer for sending points to the master processor.
-b_point *point_send_buffer = NULL;
 // Prevent dupplicate initialisations.
 bool isInitialised = false;
 // How many processors are active.
@@ -48,7 +47,6 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 		index_body_from = body_count / totalNodes * rank;
 		index_body_to = rank == totalNodes - 1 ? body_count - 1 : body_count / totalNodes * (rank + 1) - 1;
 		count = index_body_to - index_body_from + 1;
-		point_send_buffer = calloc(count, sizeof(b_point));
 
 		// Synchronize all computed chunk data across all points.
 		MPI_Allgather(&index_body_from, 1, MPI_INT, index_froms, 1, MPI_INT, MPI_COMM_WORLD);
