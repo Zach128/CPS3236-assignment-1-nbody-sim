@@ -33,12 +33,11 @@ int count_lines(FILE *fptr) {
 }
 
 int load_points_from_file(b_point *points, const int count, FILE *fptr) {
-    int result = 0;
     int i = 0;
     
     // Load all the points by the expected pattern of mass, x, y.
     while(!feof(fptr)) {
-        result = fscanf(fptr, "%lf, %lf, %lf", &points[i].mass, &points[i].pos.x, &points[i].pos.y);
+        fscanf(fptr, "%lf, %lf, %lf", &points[i].mass, &points[i].pos.x, &points[i].pos.y);
         i++;
     }
 
@@ -62,7 +61,8 @@ b_point *process_file(const char *path, int *point_count) {
     printf("Found points: %d\n", *point_count);
 
     // Allocate space for them, so we can return a pointer to this space.
-    b_point *points = calloc(*point_count, sizeof(b_point));
+    b_point *points = NULL;
+    MPI_Alloc_mem(sizeof(b_point) * *point_count, MPI_INFO_NULL, &points);
 
     int load_result = load_points_from_file(points, *point_count, fptr);
 

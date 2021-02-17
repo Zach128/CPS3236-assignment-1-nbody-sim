@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <time.h>
+#ifdef DEBUG_MODE
+#include <unistd.h>
+#endif
 
 #include "cli.h"
 #include "fdata.h"
@@ -8,8 +12,19 @@
 #include "nbody.h"
 
 int main(int argc, char **argv) {
-    int  numtasks, rank, len, rc; 
+    int  numtasks, rank, len, rc;
     char hostname[MPI_MAX_PROCESSOR_NAME];
+    struct timespec tstart={0,0}, tend={0,0};
+
+#ifdef DEBUG_MODE
+    {
+        int z = 0;
+        while (z == 0)
+        {
+            sleep(5);
+        }
+    }
+#endif
 
     // Prepare the MPI runtime
     rc = MPI_Init(&argc, &argv);
@@ -20,7 +35,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    MPI_Datatype mpi_b_point_t = *get_mpi_b_point_type();
+    MPI_Datatype mpi_b_point_t = get_mpi_b_point_type();
 
     // Acquire info about this process.
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
@@ -53,11 +68,10 @@ int main(int argc, char **argv) {
             bodyCount = point_count;
         } else if (args.num_particles > 0) {
             int num_points = args.num_particles;
-            b_point *rand_points = malloc(num_points * sizeof(b_point));
+            MPI_Alloc_mem(num_points * sizeof(b_point), MPI_INFO_NULL, &points);
 
-            generate_rand_points(rand_points, num_points);
+            generate_rand_points(points, num_points);
             printf("Generated %d points.\n", num_points);
-            points = rand_points;
             bodyCount = num_points;
         }
     }
@@ -70,7 +84,7 @@ int main(int argc, char **argv) {
 
     // Since slave processes wont have the arrays initialised, tell them to allocate the space.
     if (rank != 0) {
-        points = malloc(sizeof(b_point) * bodyCount);
+        points = calloc(bodyCount, sizeof(b_point));
     }
 
     int result = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
@@ -87,18 +101,17 @@ int main(int argc, char **argv) {
 
     loadNbodyPoints(numtasks, rank, points, bodyCount, time_delta);
 
-    for(int i = 0; i < totalIterations; i++) {
-        int syncResult = MPI_Bcast(points, bodyCount, mpi_b_point_t, 0, MPI_COMM_WORLD);
+    // Get the start time of the calculation.
+    if (rank == 0) {
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
+    }
 
-        if (syncResult != MPI_SUCCESS) {
-            printf("Failed to broadcast points in iteration %d\n", i);
-            return 1;
-        }
+    for (int i = 0; i < totalIterations; i++) {
         // Process the points.
         ComputeForces(points, bodyCount, grav_constant, time_delta);
 
-        //Synchronise the points buffer across all nodes.
-        syncBodiesWithMaster(points);
+        //Synchronise the points buffer across all ranks.
+        syncBodiesAcrossRanks(points);
 
         // Output the points (if we're on the master process).
         if (rank == 0 && args.output)
@@ -107,22 +120,23 @@ int main(int argc, char **argv) {
         }
     }
 
-    // MPI_Barrier(MPI_COMM_WORLD);
-    if (rank == 0 && args.output)
+    if (rank == 0)
     {
         printf("Simulation complete. Final body arrangement:\n");
         print_points(points, bodyCount);
+        // Get the end-time and print the duration of the simulation.
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+        printf("Nbody simulation took about %.5f seconds\n",
+           ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
+           ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
     }
 
     // For some reason, running the below would cause one of the nodes to throw a segfault.
     // Clean up
-    // if (rank != 0) {
-    //     printf("Cleaning up\n");
-    //     free(points);
-    //     // MPI_Free_mem(points);
-    // }
+    printf("Cleaning up\n");
+    MPI_Free_mem(points);
 
-    // MPI_Type_free(&mpi_b_point_t);
+    MPI_Type_free(&mpi_b_point_t);
     MPI_Finalize();
     return 0;
 }

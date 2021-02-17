@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h> 
 
 #include "vector2.h"
@@ -34,11 +35,11 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 	// we don't want to run this more than once.
 	if (!isInitialised)
 	{
-		index_froms = malloc(sizeof(int) * totalNodes);
-		index_tos = malloc(sizeof(int) * totalNodes);
-		counts = malloc(sizeof(int) * totalNodes);
+		index_froms = calloc(totalNodes, sizeof(int));
+		index_tos = calloc(totalNodes, sizeof(int));
+		counts = calloc(totalNodes, sizeof(int));
 
-		mpi_b_point_t = *get_mpi_b_point_type();
+		mpi_b_point_t = get_mpi_b_point_type();
 
 		total_nodes = totalNodes;
 		_rank = rank;
@@ -60,41 +61,22 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 	}
 }
 
-void syncBodiesWithMaster(b_point *points)
+void syncBodiesAcrossRanks(b_point *points)
 {
-	b_point sendBuff[count];
+	b_point *sendBuff;
+	MPI_Alloc_mem(count * sizeof(b_point), MPI_INFO_NULL, &sendBuff);
 
-	MPI_Barrier(MPI_COMM_WORLD);
-	if (_rank != 0)
+	// Prepare a buffer with this ranks points to be sent.
+	for(int i = 0; i < count; i++)
 	{
-		// If running in a slave processor, prepare a point buffer to send over with the relavant data.
-		for(int i = 0; i < count; i++)
-		{
-			sendBuff[i] = points[index_body_from + i];
-		}
-
-		// printf("Rank %d: Sending %d elements with offset of %d\n", _rank, count, index_body_from);
-		MPI_Send(sendBuff, count, mpi_b_point_t, 0, 0, MPI_COMM_WORLD);
-	}
-	else
-	{
-		// If running in the master processor, begin gathering all the new point data submitted by the slave processors.
-		for(int i = 1; i < total_nodes; i++)
-		{
-			b_point recBuff[counts[i]];
-			MPI_Recv(recBuff, counts[i], mpi_b_point_t, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			
-			// Write the new data to the points array.
-			for(int recI = 0; recI < counts[i]; recI++)
-			{
-				points[index_froms[i] + recI] = recBuff[recI];
-			}
-		}
-
-		// printf("Rank %d: Synchonised point data\n", _rank);
+		sendBuff[i] = points[index_body_from + i];
 	}
 
-	// int result = MPI_Allgatherv(sendBuff, count, mpi_b_point_t, recvBuff, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
+	// Dispatch the data, writing it back to the points array.
+	// Location in the array and how much to receive is determined by the sending rank.
+	MPI_Allgatherv(sendBuff, count, mpi_b_point_t, points, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
+	
+	MPI_Free_mem(sendBuff);
 }
 
 void MoveBodies(b_point *bodies, int body_count, float time_delta)

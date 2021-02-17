@@ -6,13 +6,14 @@
 
 #include "bpoint.h"
 
+MPI_Aint mpi_type_size = 0;
 MPI_Datatype mpi_type = 0;
 
-MPI_Datatype *get_mpi_b_point_type() {
+MPI_Datatype get_mpi_b_point_type() {
     if (mpi_type == 0) {
         // Register b_point type with mpi.
         const int n_props = 5;
-        int blocklengths[5] = { 2, 2, 2, 2, 2 };
+        int blocklengths[5] = { 1, 1, 1, 1, 1 };
         MPI_Datatype types[5] = { MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE };
         MPI_Aint offsets[5] = {
             offsetof(b_point, mass),
@@ -24,10 +25,9 @@ MPI_Datatype *get_mpi_b_point_type() {
 
         MPI_Type_create_struct(n_props, blocklengths, offsets, types, &mpi_type);
         MPI_Type_commit(&mpi_type);
-
-        return &mpi_type;
+        return mpi_type;
     } else {
-        return &mpi_type;
+        return mpi_type;
     }
 }
 
