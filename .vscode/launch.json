@@ -21,36 +21,6 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
-            "name": "(mpi) Nbody with file",
-            "type": "cppdbg",
-            "request": "launch",
-            // "request": "attach",
-            // "processId": "${command:pickProcess}",
-            "program": "/usr/bin/mpirun",
-            "args": [
-                "-np",
-                "1",
-                "./nbody.out",
-                "-p",
-                "4"
-                // "res/data/input_64.txt"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            // "preLaunchTask": "C/C++: mpicc build active file",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
             "name": "Nbody without file",
             "type": "cppdbg",
             "request": "launch",
@@ -68,7 +38,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: gcc-9 build active file",
+            "preLaunchTask": "Make with debug=true",
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
@@ -78,7 +48,9 @@
             "program": "${workspaceFolder}/nbody.out",
             "args": [
                 "-f",
-                "res/data/input_64.txt"
+                "res/data/input_64.txt",
+                "-o",
+                "false"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -92,28 +64,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: mpicc build active file",
-            "miDebuggerPath": "/usr/bin/gdb"
-        },
-        {
-            "name": "gcc-9 - Build and debug tests",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/tests.out",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "C/C++: gcc-9 build tests",
+            "preLaunchTask": "Make with debug=true",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
