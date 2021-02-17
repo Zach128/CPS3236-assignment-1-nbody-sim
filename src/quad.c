@@ -24,6 +24,12 @@ b_node *init_empty_node()
 
 void free_node(b_node *node)
 {
+    for(int i = 0; i < BARNES_MAX_NODES; i++)
+    {
+        if (node->children[i] != NULL)
+            free_node(node->children[i]);
+    }
+
     free(node);
 }
 
@@ -163,13 +169,12 @@ void subdivide(b_node *root)
 
 bool insert(b_point *point, b_node *root_node)
 {
-
-    if(!is_inside_box(&point->pos, &root_node->boundary))
+    if (!is_inside_box(&point->pos, &root_node->boundary))
         return false;
 
     // First, check we already have the point.
     // Will be replaced by a space query.
-	for(int i = 0; i < root_node->child_count; i++)
+	for (int i = 0; i < root_node->child_count; i++)
 	{
 		// If this node has the same point already, we can't add it.
 		if (root_node->points[i] == point)
@@ -191,18 +196,26 @@ bool insert(b_point *point, b_node *root_node)
     else if (root_node->children[0] == NULL)
 	{
         subdivide(root_node);
-
-        // Try to insert the point into the child nodes.
-        for(int i = 0; i < BARNES_MAX_NODES; i++)
-        {
-            if (insert(point, root_node->children[i])) return true;
-        }
 	}
+
+    // Try to insert the point into the child nodes.
+    for(int i = 0; i < BARNES_MAX_NODES; i++)
+    {
+        if (insert(point, root_node->children[i])) return true;
+    }
 
     // We shouldn't reach this spot. If we do, something went wrong.
     return false;
 }
 
-void ComputeBarnesForces(b_point *point, b_node *node)
+b_node *tree_from_points(b_point *points, int bodyCount)
 {
+    b_node *tree = create_root_node(points, bodyCount);
+
+	for(int i = 0; i < bodyCount; i++)
+	{
+		insert(&(points[i]), tree);
+	}
+
+    return tree;
 }

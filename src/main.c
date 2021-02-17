@@ -107,13 +107,7 @@ int main(int argc, char **argv) {
         clock_gettime(CLOCK_MONOTONIC, &tstart);
     }
 
-    // b_node *root = create_root_node(points, bodyCount);
-
-    // insert(&points[0], root);
-    // insert(&points[1], root);
-    // insert(&points[2], root);
-    // insert(&points[3], root);
-    // insert(&points[4], root);
+    BarnesComputeForces(points, bodyCount);
 
     for (int i = 0; i < totalIterations; i++) {
         // Process the points.

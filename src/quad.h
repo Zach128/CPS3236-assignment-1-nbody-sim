@@ -24,6 +24,8 @@ typedef struct b_node {
 } b_node;
 
 b_node *create_root_node(b_point *points, int pointCount);
+void free_node(b_node *node);
 bool insert(b_point *point, b_node *root_node);
+b_node *tree_from_points(b_point *points, int bodyCount);
 
 #endif

@@ -7,6 +7,7 @@
 #include "vector2.h"
 #include "nbody.h"
 #include "bpoint.h"
+#include "quad.h"
 
 // Type of the b_point struct.
 MPI_Datatype mpi_b_point_t;
@@ -144,4 +145,11 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 
 	MoveBodies(bodies, body_count, time_delta);
 
+}
+
+void BarnesComputeForces(b_point *points, int bodyCount)
+{
+	b_node *tree = tree_from_points(points, bodyCount);
+
+	free_node(tree);
 }
