@@ -34,7 +34,7 @@ int *index_tos;
 // Processors own start and end index.
 int index_body_from, index_body_to;
 
-void load_nbody_params(int totalNodes, int rank, int bodyCount, b_point *bodies, int body_count, double gravConstant, double timeDelta)
+void load_nbody_params(int totalNodes, int rank, b_point *bodies, int bodyCount, double gravConstant, double timeDelta)
 {
 	// we don't want to run this more than once.
 	if (!isInitialised)

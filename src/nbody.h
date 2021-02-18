@@ -10,13 +10,12 @@
  * 
  * totalNodes: The total number of active processes.
  * rank: The rank of this process/instance.
- * body_count: How many bodies/points are going to be simulated.
  * bodies: The bodies to simulate.
  * bodyCount: How many bodies are in the array.
  * gravConstant: The gravitational constant.
  * timeDelta: How much time passes per step/iteration.
  **/
-void load_nbody_params(int totalNodes, int rank, int body_count, b_point *bodies, int bodyCount, double gravConstant, double timeDelta);
+void load_nbody_params(int totalNodes, int rank, b_point *bodies, int bodyCount, double gravConstant, double timeDelta);
 
 /**
  * Function: sync_across_ranks
