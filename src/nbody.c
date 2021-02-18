@@ -32,14 +32,11 @@ int *index_tos;
 // Processors own start and end index.
 int index_body_from, index_body_to;
 
-void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, float time_delta)
+void load_nbody_params(int totalNodes, int rank, b_point *bodies, int bodyCount, float time_delta)
 {
 	// we don't want to run this more than once.
 	if (!isInitialised)
 	{
-		// index_froms = malloc(totalNodes * sizeof(int));
-		// index_tos = malloc(totalNodes * sizeof(int));
-		// counts = malloc(totalNodes * sizeof(int));
 		MPI_Alloc_mem(totalNodes * sizeof(int), MPI_INFO_NULL, &index_froms);
 		MPI_Alloc_mem(totalNodes * sizeof(int), MPI_INFO_NULL, &index_tos);
 		MPI_Alloc_mem(totalNodes * sizeof(int), MPI_INFO_NULL, &counts);
@@ -67,11 +64,8 @@ void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int bodyCount, f
 	}
 }
 
-void syncBodiesAcrossRanks(b_point *points)
+void sync_across_ranks(b_point *points)
 {
-	// b_point *sendBuff = malloc(count * sizeof(b_point));
-	// MPI_Alloc_mem(count * sizeof(b_point), MPI_INFO_NULL, &sendBuff);
-
 	// Prepare a buffer with this ranks points to be sent.
 	for(int i = 0; i < count; i++)
 	{
@@ -81,28 +75,18 @@ void syncBodiesAcrossRanks(b_point *points)
 	// Dispatch the data, writing it back to the points array.
 	// Location in the array and how much to receive is determined by the sending rank.
 	MPI_Allgatherv(sendBuff, count, mpi_b_point_t, points, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
-	
-	// MPI_Free_mem(sendBuff);
 }
 
-void MoveBodies(b_point *bodies, int body_count, float time_delta)
+void move_bodies(b_point *bodies, int body_count, float time_delta)
 {
-	vec2 buffer = { 0.f, 0.f };
-
 #ifdef USE_OMP
-	#pragma omp parallel for private(buffer), schedule(static)
+	#pragma omp parallel for schedule(static)
 #endif
 	for (int i = index_body_from; i <= index_body_to; i++)
 	{
 		// bodies[i]->pos += bodies[i].vel * time_delta;
-		// vec2Mulf(&bodies[i].vel, time_delta, &buffer);
-		// vec2Addvec2(&bodies[i].pos, &buffer, &bodies[i].pos);
-		
-		buffer.x += bodies[i].vel.x * time_delta;
-		buffer.y += bodies[i].vel.y * time_delta;
-
-		bodies[i].pos.x += buffer.x;
-		bodies[i].pos.y += buffer.y;
+		bodies[i].pos.x += bodies[i].vel.x * time_delta;
+		bodies[i].pos.y += bodies[i].vel.y * time_delta;
 	}
 }
 
@@ -125,8 +109,6 @@ void get_force(b_point *target, vec2 *src, double srcMass, vec2 *out)
 
 	// Accumulate force. Follows the below calculation
 	// force += direction / (distance * distance * distance) * p2->mass; 
-	// vec2Divf(&direction, (distance * distance * distance), out);
-	// vec2Mulf(out, srcMass, out);
 	distance = distance * distance * distance;
 	out->x += direction.x / distance * srcMass;
 	out->y += direction.y / distance * srcMass;
@@ -134,50 +116,29 @@ void get_force(b_point *target, vec2 *src, double srcMass, vec2 *out)
 
 void compute_velocity(b_point *target, vec2 *force, float grav_constant, float time_delta)
 {
-	vec2 acceleration = {0, 0};
-	vec2 buffer = {0, 0};
-
+	// vec2 acceleration = {0, 0};
 	// Compute acceleration for body.
-	// acceleration = force * p_gravitationalTerm;
-	// vec2Mulf(force, grav_constant, &acceleration);
-	acceleration.x = force->x * grav_constant;
-	acceleration.y = force->y * grav_constant;
-
 	// Integrate velocity (m/s).
+	// acceleration = force * p_gravitationalTerm;
 	// p1.Velocity += acceleration * p_deltaT;
-	// vec2Addvec2(&target->vel, vec2Mulf(&acceleration, time_delta, &buffer), &target->vel);
-	target->vel.x += acceleration.x * time_delta;
-	target->vel.y += acceleration.y * time_delta;
+	target->vel.x += force->x * grav_constant * time_delta;
+	target->vel.y += force->y * grav_constant * time_delta;
 }
 
-void ComputeForces(b_point *bodies, int body_count, float grav_constant, float time_delta)
+void naive_main(b_point *bodies, int body_count, float grav_constant, float time_delta)
 {
-	vec2 force = { 0, 0 };
-	vec2 acceleration = { 0, 0 };
-	vec2 buffer = { 0, 0 };
 
 #ifdef USE_OMP
-	#pragma omp parallel for private(force,acceleration,buffer), schedule(static)
+	#pragma omp parallel for schedule(static)
 #endif
 		for (int j = index_body_from; j <= index_body_to; j++)
 		{
 			b_point *p1 = &bodies[j];
-		
-			force.x = acceleration.x = buffer.x = 0.f;
-			force.y = acceleration.y = buffer.y = 0.f;
-
-			if (j == 13)
-			{
-				// printf("Here\n");
-			}
+			vec2 force = { 0, 0 };
 		
 			for (int k = 0; k < body_count; k++)
 			{
 				if (k == j) continue;
-				if (k == 14)
-				{
-					// printf("Here\n");
-				}
 
 				b_point *p2 = &bodies[k];
 				
@@ -186,9 +147,7 @@ void ComputeForces(b_point *bodies, int body_count, float grav_constant, float t
 
 			compute_velocity(p1, &force, grav_constant, time_delta);
 		}
-
-	MoveBodies(bodies, body_count, time_delta);
-
+	move_bodies(bodies, body_count, time_delta);
 }
 
 bool is_node_close_enough(b_point *target, b_node *tree)
@@ -201,7 +160,7 @@ bool is_node_close_enough(b_point *target, b_node *tree)
 	return qoutient > BARNES_NODE_DIST_TITA;
 }
 
-void barnesComputeForce(b_point *target, b_node *tree, vec2 *force)
+void barnes_compute_force(b_point *target, b_node *tree, vec2 *force)
 {
 
 	for (int i = 0; i < tree->child_count; i++)
@@ -212,7 +171,7 @@ void barnesComputeForce(b_point *target, b_node *tree, vec2 *force)
 			if (is_node_close_enough(target, tree->children[i]))
 			{
 				// If it's close enough, we recursively iterate over the child node.
-				barnesComputeForce(target, tree->children[i], force);
+				barnes_compute_force(target, tree->children[i], force);
 			}
 			else
 			{
@@ -232,20 +191,23 @@ void barnesComputeForce(b_point *target, b_node *tree, vec2 *force)
 	}
 }
 
-void BarnesMain(b_point *points, int bodyCount, float grav_constant, float time_delta)
+void barnes_main(b_point *points, int bodyCount, float grav_constant, float time_delta)
 {
 
 	b_node *tree = tree_from_points(points, bodyCount);
 
+#ifdef USE_OMP
+	#pragma omp parallel for schedule(static)
+#endif
 	for(int i = 0; i < bodyCount; i++)
 	{
 		vec2 force = { 0, 0 };
-		barnesComputeForce(&points[i], tree, &force);
+		barnes_compute_force(&points[i], tree, &force);
 
 		compute_velocity(&points[i], &force, grav_constant, time_delta);
 	}
 
-	MoveBodies(points, body_count, time_delta);
+	move_bodies(points, body_count, time_delta);
 
 	free_node(tree);
 }

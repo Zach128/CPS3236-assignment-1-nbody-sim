@@ -100,43 +100,43 @@ int main(int argc, char **argv) {
     printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, totalIterations);
     printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
 
-    int testCount = 6;
-    b_point testPoints[6] = {
-        { 1, {0, 0}, {1, 1} },
-        { 2, {0, 0}, {1, 3} },
-        { 3, {0, 0}, {3, 1} },
-        { 4, {0, 0}, {3, 3} },
-        { 5, {0, 0}, {1.5, 1.5} },
-        { 6, {0, 0}, {2, 2} },
-    };
-
-    loadNbodyPoints(numtasks, rank, points, bodyCount, time_delta);
+    load_nbody_params(numtasks, rank, points, bodyCount, 2);
 
     // Get the start time of the calculation.
     if (rank == 0) {
         clock_gettime(CLOCK_MONOTONIC, &tstart);
     }
 
-    // for (int i = 0; i < totalIterations; i++) {
-    //     BarnesMain(points, bodyCount, grav_constant, time_delta);
+    // Decide on the simulation strategy.
+    if (numtasks == 1)
+    {
+        // If only one process is running, use the optimised Barnes-Hut implementation.
+        printf("Using Barnes-Hut\n");
+        for (int i = 0; i < totalIterations; i++) {
+            barnes_main(points, bodyCount, grav_constant, 2);
 
-    //     if (rank == 0 && args.output)
-    //     {
-    //         save_points_iteration(points, bodyCount, i + 1);
-    //     }
-    // }
+            if (rank == 0 && args.output)
+            {
+                save_points_iteration(points, bodyCount, i + 1);
+            }
+        }
+    }
+    else
+    {
+        // Otherwise, if there's more than one process (distributed memory), use the naive implementation.
+        printf("Using Naive\n");
+        for (int i = 0; i < totalIterations; i++) {
+            // Process the points.
+            naive_main(points, bodyCount, grav_constant, time_delta);
 
-    for (int i = 0; i < totalIterations; i++) {
-        // Process the points.
-        ComputeForces(points, bodyCount, grav_constant, time_delta);
+            //Synchronise the points buffer across all ranks.
+            sync_across_ranks(points);
 
-        //Synchronise the points buffer across all ranks.
-        syncBodiesAcrossRanks(points);
-
-        // Output the points (if we're on the master process).
-        if (rank == 0 && args.output)
-        {
-            save_points_iteration(points, bodyCount, i + 1);
+            // Output the points (if we're on the master process).
+            if (rank == 0 && args.output)
+            {
+                save_points_iteration(points, bodyCount, i + 1);
+            }
         }
     }
 
