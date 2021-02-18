@@ -230,6 +230,7 @@ void compute_masses(b_node *tree)
             if (tree->children[i]->child_count != 0)
                 compute_masses(tree->children[i]);
 
+            // Add the node's CoM and positions to ours.
             com->m += tree->children[i]->center_of_mass.m;
             com->v.x += tree->children[i]->center_of_mass.v.x * tree->children[i]->center_of_mass.m;
             com->v.y += tree->children[i]->center_of_mass.v.y * tree->children[i]->center_of_mass.m;

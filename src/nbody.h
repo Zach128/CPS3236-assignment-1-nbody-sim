@@ -3,7 +3,17 @@
 
 #include "bpoint.h"
 
-void load_nbody_params(int totalNodes, int rank, b_point *bodies, int body_count, float time_delta);
+/**
+ * Function: load_nbody_params
+ * ---------------------
+ * Initialise the nbody simulator with the necessary parameters for distributed memery scenarios.
+ * 
+ * totalNodes: The total number of active processes.
+ * rank: The rank of this process/instance.
+ * body_count: How many bodies/points are going to be simulated.
+ * 
+ **/
+void load_nbody_params(int totalNodes, int rank, int body_count);
 void sync_across_ranks(b_point *points);
 void naive_main(b_point *bodies, int body_count, float grav_constant, float time_delta);
 void move_bodies(b_point *bodies, int body_count, float time_delta);

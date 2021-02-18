@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     double grav_constant = args.grav_constant;
     double time_delta = args.time_step;
     int bodyCount = 0;
-    int totalIterations = args.num_iterations;
+    int total_iterations = args.num_iterations;
     b_point *points = NULL;
 
     // We only want to run this code on the master process.
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
     MPI_Bcast(&bodyCount, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&grav_constant, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&time_delta, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&totalIterations, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&total_iterations, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     // Since slave processes wont have the arrays initialised, tell them to allocate the space.
     if (rank != 0) {
@@ -97,10 +97,10 @@ int main(int argc, char **argv) {
 
     // Debug info.
     printf("Hello world from process %s with rank %d out of %d processors\n", hostname, rank, numtasks);
-    printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, totalIterations);
+    printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, total_iterations);
     printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
 
-    load_nbody_params(numtasks, rank, points, bodyCount, 2);
+    load_nbody_params(numtasks, rank, bodyCount);
 
     // Get the start time of the calculation.
     if (rank == 0) {
@@ -112,8 +112,8 @@ int main(int argc, char **argv) {
     {
         // If only one process is running, use the optimised Barnes-Hut implementation.
         printf("Using Barnes-Hut\n");
-        for (int i = 0; i < totalIterations; i++) {
-            barnes_main(points, bodyCount, grav_constant, 2);
+        for (int i = 0; i < total_iterations; i++) {
+            barnes_main(points, bodyCount, grav_constant, time_delta);
 
             if (rank == 0 && args.output)
             {
@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
     {
         // Otherwise, if there's more than one process (distributed memory), use the naive implementation.
         printf("Using Naive\n");
-        for (int i = 0; i < totalIterations; i++) {
+        for (int i = 0; i < total_iterations; i++) {
             // Process the points.
             naive_main(points, bodyCount, grav_constant, time_delta);
 

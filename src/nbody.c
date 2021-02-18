@@ -32,7 +32,7 @@ int *index_tos;
 // Processors own start and end index.
 int index_body_from, index_body_to;
 
-void load_nbody_params(int totalNodes, int rank, b_point *bodies, int bodyCount, float time_delta)
+void load_nbody_params(int totalNodes, int rank, int bodyCount)
 {
 	// we don't want to run this more than once.
 	if (!isInitialised)
@@ -100,7 +100,7 @@ void get_force(b_point *target, vec2 *src, double srcMass, vec2 *out)
 	direction.y = src->y - target->pos.y;
 
 	// Calculate the length of the computed direction.
-	double direction_length = fabs(vec2Length(&direction));
+	double direction_length = VEC2_LENGTH(direction);
 	
 	// Limit distance term to avoid singularities.
 	// distance = std::max<float>( 0.5f * (p2.Mass + p1.Mass), fabs(direction.Length()) );
@@ -116,7 +116,6 @@ void get_force(b_point *target, vec2 *src, double srcMass, vec2 *out)
 
 void compute_velocity(b_point *target, vec2 *force, float grav_constant, float time_delta)
 {
-	// vec2 acceleration = {0, 0};
 	// Compute acceleration for body.
 	// Integrate velocity (m/s).
 	// acceleration = force * p_gravitationalTerm;
@@ -152,10 +151,13 @@ void naive_main(b_point *bodies, int body_count, float grav_constant, float time
 
 bool is_node_close_enough(b_point *target, b_node *tree)
 {
-	vec2 fullSize = { .x = tree->boundary.half_size.x * 2, .y = tree->boundary.half_size.y * 2 };
+	vec2 fullSize = {
+		.x = tree->boundary.half_size.x * 2,
+		.y = tree->boundary.half_size.y * 2
+	};
 	vec2 d = { .x = fabs(target->pos.x - tree->center_of_mass.v.x), .y = fabs(target->pos.y - tree->center_of_mass.v.y) };
 	double s = (fullSize.x + fullSize.y) / 2;
-	double qoutient = s / vec2Length(&d);
+	double qoutient = s / VEC2_LENGTH(d);
 
 	return qoutient > BARNES_NODE_DIST_TITA;
 }
