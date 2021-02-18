@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
     printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, total_iterations);
     printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
 
-    load_nbody_params(numtasks, rank, bodyCount, points, bodyCount, time_delta, grav_constant);
+    load_nbody_params(numtasks, rank, points, bodyCount, time_delta, grav_constant);
 
     // Get the start time of the calculation.
     if (rank == 0) {
