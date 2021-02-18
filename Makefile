@@ -65,8 +65,8 @@ clean:
 help:
 	@echo -----------------------------------------------------------------
 	@echo make: Make into nbody.out
-	@echo make debug=true: Enable debug (-g) support.
-	@echo make debug=omp: Enable debug (-g) support for mpi parallel programs.
+	@echo make debug=true: Enable debug \(-g\) support.
+	@echo make debug=omp: Enable debug \(-g\) support for mpi parallel programs.
 	@echo make use_omp=true: Make into nbody.out with OpenMP functionality.
 	@echo -----------------------------------------------------------------
 
