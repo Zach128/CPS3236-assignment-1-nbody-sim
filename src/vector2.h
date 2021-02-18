@@ -13,6 +13,7 @@ typedef struct mvec2 {
     vec2 v;
 } mvec2;
 
+// Get the length of a given vector.
 #define VEC2_LENGTH(v) (fabs(sqrtf(v.x * v.x + v.y * v.y)))
 
 #endif

@@ -133,39 +133,6 @@ b_node *create_root_node(b_point *points, int pointCount)
     return root;
 }
 
-void subdivide(b_node *root)
-{
-
-    // Initialise each child node.
-	for(int i = 0; i < BARNES_MAX_NODES; i++)
-	{
-        // Create and assign the child node.
-		b_node *child = init_empty_node();
-        child->parent = root;
-		root->children[i] = child;
-
-        // Now that the child node is connected, get the bounding box.
-        init_child_bounding_box(root, i);
-	}
-
-    for(int i = 0; i < BARNES_MAX_NODES; i++)
-    {
-        // If the point is not null, try insert it into the child nodes.
-        if (root->points[i] != NULL)
-        {
-            for(int j = 0; j < BARNES_MAX_NODES; j++)
-            {
-                // If the point inserts successfully, remove its address from the root and break.
-                if (insert(root->points[i], root->children[j]))
-                {
-                    root->points[i] = NULL;
-                    break;
-                }
-            }
-        }
-    }
-}
-
 bool insert(b_point *point, b_node *root_node)
 {
     if (!is_inside_box(&point->pos, &root_node->boundary))
@@ -205,6 +172,39 @@ bool insert(b_point *point, b_node *root_node)
 
     // We shouldn't reach this spot. If we do, something went wrong.
     return false;
+}
+
+void subdivide(b_node *root)
+{
+
+    // Initialise each child node.
+	for(int i = 0; i < BARNES_MAX_NODES; i++)
+	{
+        // Create and assign the child node.
+		b_node *child = init_empty_node();
+        child->parent = root;
+		root->children[i] = child;
+
+        // Now that the child node is connected, get the bounding box.
+        init_child_bounding_box(root, i);
+	}
+
+    for(int i = 0; i < BARNES_MAX_NODES; i++)
+    {
+        // If the point is not null, try insert it into the child nodes.
+        if (root->points[i] != NULL)
+        {
+            for(int j = 0; j < BARNES_MAX_NODES; j++)
+            {
+                // If the point inserts successfully, remove its address from the root and break.
+                if (insert(root->points[i], root->children[j]))
+                {
+                    root->points[i] = NULL;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void compute_masses(b_node *tree)

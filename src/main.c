@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
     printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, total_iterations);
     printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
 
-    load_nbody_params(numtasks, rank, bodyCount);
+    load_nbody_params(numtasks, rank, bodyCount, points, bodyCount, time_delta, grav_constant);
 
     // Get the start time of the calculation.
     if (rank == 0) {
@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
         // If only one process is running, use the optimised Barnes-Hut implementation.
         printf("Using Barnes-Hut\n");
         for (int i = 0; i < total_iterations; i++) {
-            barnes_main(points, bodyCount, grav_constant, time_delta);
+            barnes_main();
 
             if (rank == 0 && args.output)
             {
@@ -127,10 +127,7 @@ int main(int argc, char **argv) {
         printf("Using Naive\n");
         for (int i = 0; i < total_iterations; i++) {
             // Process the points.
-            naive_main(points, bodyCount, grav_constant, time_delta);
-
-            //Synchronise the points buffer across all ranks.
-            sync_across_ranks(points);
+            naive_main();
 
             // Output the points (if we're on the master process).
             if (rank == 0 && args.output)

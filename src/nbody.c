@@ -8,9 +8,11 @@
 #include "nbody.h"
 #include "bpoint.h"
 #include "quad.h"
-#include "barnes.h"
 
 b_point *sendBuff = NULL;
+b_point *points = NULL;
+double grav_constant;
+double time_delta;
 // Type of the b_point struct.
 MPI_Datatype mpi_b_point_t;
 // Prevent dupplicate initialisations.
@@ -32,11 +34,16 @@ int *index_tos;
 // Processors own start and end index.
 int index_body_from, index_body_to;
 
-void load_nbody_params(int totalNodes, int rank, int bodyCount)
+void load_nbody_params(int totalNodes, int rank, int bodyCount, b_point *bodies, int body_count, double gravConstant, double timeDelta)
 {
 	// we don't want to run this more than once.
 	if (!isInitialised)
 	{
+		points = bodies;
+		body_count = bodyCount;
+		grav_constant = gravConstant;
+		time_delta = timeDelta;
+
 		MPI_Alloc_mem(totalNodes * sizeof(int), MPI_INFO_NULL, &index_froms);
 		MPI_Alloc_mem(totalNodes * sizeof(int), MPI_INFO_NULL, &index_tos);
 		MPI_Alloc_mem(totalNodes * sizeof(int), MPI_INFO_NULL, &counts);
@@ -64,7 +71,7 @@ void load_nbody_params(int totalNodes, int rank, int bodyCount)
 	}
 }
 
-void sync_across_ranks(b_point *points)
+void sync_across_ranks()
 {
 	// Prepare a buffer with this ranks points to be sent.
 	for(int i = 0; i < count; i++)
@@ -77,7 +84,7 @@ void sync_across_ranks(b_point *points)
 	MPI_Allgatherv(sendBuff, count, mpi_b_point_t, points, counts, index_froms, mpi_b_point_t, MPI_COMM_WORLD);
 }
 
-void move_bodies(b_point *bodies, int body_count, float time_delta)
+void move_bodies()
 {
 #ifdef USE_OMP
 	#pragma omp parallel for schedule(static)
@@ -85,8 +92,8 @@ void move_bodies(b_point *bodies, int body_count, float time_delta)
 	for (int i = index_body_from; i <= index_body_to; i++)
 	{
 		// bodies[i]->pos += bodies[i].vel * time_delta;
-		bodies[i].pos.x += bodies[i].vel.x * time_delta;
-		bodies[i].pos.y += bodies[i].vel.y * time_delta;
+		points[i].pos.x += points[i].vel.x * time_delta;
+		points[i].pos.y += points[i].vel.y * time_delta;
 	}
 }
 
@@ -114,7 +121,7 @@ void get_force(b_point *target, vec2 *src, double srcMass, vec2 *out)
 	out->y += direction.y / distance * srcMass;
 }
 
-void compute_velocity(b_point *target, vec2 *force, float grav_constant, float time_delta)
+void compute_velocity(b_point *target, vec2 *force)
 {
 	// Compute acceleration for body.
 	// Integrate velocity (m/s).
@@ -124,7 +131,7 @@ void compute_velocity(b_point *target, vec2 *force, float grav_constant, float t
 	target->vel.y += force->y * grav_constant * time_delta;
 }
 
-void naive_main(b_point *bodies, int body_count, float grav_constant, float time_delta)
+void naive_main()
 {
 
 #ifdef USE_OMP
@@ -132,21 +139,24 @@ void naive_main(b_point *bodies, int body_count, float grav_constant, float time
 #endif
 		for (int j = index_body_from; j <= index_body_to; j++)
 		{
-			b_point *p1 = &bodies[j];
+			b_point *p1 = &points[j];
 			vec2 force = { 0, 0 };
 		
 			for (int k = 0; k < body_count; k++)
 			{
 				if (k == j) continue;
 
-				b_point *p2 = &bodies[k];
+				b_point *p2 = &points[k];
 				
 				get_force(p1, &p2->pos, p2->mass, &force);
 			}
 
-			compute_velocity(p1, &force, grav_constant, time_delta);
+			compute_velocity(p1, &force);
 		}
-	move_bodies(bodies, body_count, time_delta);
+	move_bodies();
+
+	//Synchronise the points buffer across all ranks.
+	sync_across_ranks();
 }
 
 bool is_node_close_enough(b_point *target, b_node *tree)
@@ -193,23 +203,23 @@ void barnes_compute_force(b_point *target, b_node *tree, vec2 *force)
 	}
 }
 
-void barnes_main(b_point *points, int bodyCount, float grav_constant, float time_delta)
+void barnes_main()
 {
 
-	b_node *tree = tree_from_points(points, bodyCount);
+	b_node *tree = tree_from_points(points, body_count);
 
 #ifdef USE_OMP
 	#pragma omp parallel for schedule(static)
 #endif
-	for(int i = 0; i < bodyCount; i++)
+	for(int i = 0; i < body_count; i++)
 	{
 		vec2 force = { 0, 0 };
 		barnes_compute_force(&points[i], tree, &force);
 
-		compute_velocity(&points[i], &force, grav_constant, time_delta);
+		compute_velocity(&points[i], &force);
 	}
 
-	move_bodies(points, body_count, time_delta);
+	move_bodies();
 
 	free_node(tree);
 }
