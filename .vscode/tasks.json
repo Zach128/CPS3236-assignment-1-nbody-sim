@@ -5,6 +5,9 @@
             "label": "Make with debug=true",
             "command": "make",
             "args": [
+                "clean",
+                "&&",
+                "make",
                 "debug=true"
             ],
             "options": {

@@ -45,16 +45,16 @@ vec2 *vec2Divvec2(vec2 *v1, vec2 *v2, vec2 *out)
 
 vec2 *vec2Mulf(vec2 *v1, float value, vec2 *out)
 {
-    out->x = v1->x / value;
-    out->y = v1->y / value;
+    out->x = v1->x * value;
+    out->y = v1->y * value;
 
     return out;
 }
 
 vec2 *vec2Mulvec2(vec2 *v1, vec2 *v2, vec2 *out)
 {
-    out->x = v1->x / v2->x;
-    out->y = v1->y / v2->y;
+    out->x = v1->x * v2->x;
+    out->y = v1->y * v2->y;
 
     return out;
 }
@@ -63,5 +63,5 @@ vec2 *vec2Mulvec2(vec2 *v1, vec2 *v2, vec2 *out)
 
 double vec2Length(vec2 *v)
 {
-    return fabs(sqrtf(v->x * v->x + v->y * v->y));
+    return sqrtf(v->x * v->x + v->y * v->y);
 }
