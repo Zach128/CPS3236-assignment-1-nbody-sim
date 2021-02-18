@@ -36,14 +36,15 @@ int load_points_from_file(b_point *points, const int count, FILE *fptr) {
     int i = 0;
     
     // Load all the points by the expected pattern of mass, x, y.
-    while(!feof(fptr)) {
+    for(i = 0; i < count && !feof(fptr); ++i)
+    {
         fscanf(fptr, "%lf, %lf, %lf", &points[i].mass, &points[i].pos.x, &points[i].pos.y);
-        i++;
+        points[i].vel = (vec2) { 0, 0 };
     }
 
     // Test that we loaded the same amount of points as expected.
-    if (i -1 != count) {
-        printf("Error: Points read do not match the expected count of points:\n\tExp: %d - Act:%d\n", count, i);
+    if (i > count) {
+        printf("Error: Points read do not match the expected count of points:\n\tExp: %d - Act:%d\n", count, i - 1);
         return -1;
     }
     

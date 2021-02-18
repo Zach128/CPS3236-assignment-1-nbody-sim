@@ -3,14 +3,40 @@
 
 #include "bpoint.h"
 
-#define FIELD_WIDTH = 1000;
-#define FIELD_HALF_WIDTH = FIELD_WIDTH >> 1;
-#define FIELD_HEIGHT = 1000;
-#define FIELD_HALF_HEIGHT = FIELD_HEIGHT >> 1;
+/**
+ * Function: load_nbody_params
+ * ---------------------
+ * Initialise the nbody simulator with the necessary parameters for simulation.
+ * 
+ * totalNodes: The total number of active processes.
+ * rank: The rank of this process/instance.
+ * body_count: How many bodies/points are going to be simulated.
+ * bodies: The bodies to simulate.
+ * bodyCount: How many bodies are in the array.
+ * gravConstant: The gravitational constant.
+ * timeDelta: How much time passes per step/iteration.
+ **/
+void load_nbody_params(int totalNodes, int rank, int body_count, b_point *bodies, int bodyCount, double gravConstant, double timeDelta);
 
-void loadNbodyPoints(int totalNodes, int rank, b_point *bodies, int body_count, float time_delta);
-void syncBodiesAcrossRanks(b_point *points);
-void ComputeForces(b_point *bodies, int body_count, float grav_constant, float time_delta);
-void MoveBodies(b_point *bodies, int body_count, float time_delta);
+/**
+ * Function: sync_across_ranks
+ * ---------------------
+ * Synchronise the current points across all ranks of the simulator.
+ **/
+void sync_across_ranks();
 
+/**
+ * Function: naive_main
+ * ---------------------
+ * The main entrypoint for the naive implementation. This is parallelised for shared, distributed and hybrid memory environments.
+ * Processes one time-step, after which will need to be synchronised across all ranks (if distributed).
+ **/
+void naive_main();
+
+/**
+ * Function: barnes_main
+ * ---------------------
+ * The main entrypoint for the Barnes-Hut implementation. This is parallelised for shared scenarios only.
+ **/
+void barnes_main();
 #endif

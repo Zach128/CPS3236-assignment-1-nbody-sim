@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include <time.h>
-#ifdef DEBUG_MODE
+#ifdef DEBUG_MODE_MPI
 #include <unistd.h>
 #endif
 
@@ -10,13 +10,14 @@
 #include "fdata.h"
 #include "bpoint.h"
 #include "nbody.h"
+#include "quad.h"
 
 int main(int argc, char **argv) {
     int  numtasks, rank, len, rc;
     char hostname[MPI_MAX_PROCESSOR_NAME];
     struct timespec tstart={0,0}, tend={0,0};
 
-#ifdef DEBUG_MODE
+#ifdef DEBUG_MODE_MPI
     {
         int z = 0;
         while (z == 0)
@@ -46,7 +47,7 @@ int main(int argc, char **argv) {
     double grav_constant = args.grav_constant;
     double time_delta = args.time_step;
     int bodyCount = 0;
-    int totalIterations = args.num_iterations;
+    int total_iterations = args.num_iterations;
     b_point *points = NULL;
 
     // We only want to run this code on the master process.
@@ -80,7 +81,7 @@ int main(int argc, char **argv) {
     MPI_Bcast(&bodyCount, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&grav_constant, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&time_delta, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&totalIterations, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&total_iterations, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     // Since slave processes wont have the arrays initialised, tell them to allocate the space.
     if (rank != 0) {
@@ -96,27 +97,43 @@ int main(int argc, char **argv) {
 
     // Debug info.
     printf("Hello world from process %s with rank %d out of %d processors\n", hostname, rank, numtasks);
-    printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, totalIterations);
+    printf("%d %.f %.f %d\n", bodyCount, grav_constant, time_delta, total_iterations);
     printf("Size of point array = %ld\n", bodyCount * sizeof(b_point));
 
-    loadNbodyPoints(numtasks, rank, points, bodyCount, time_delta);
+    load_nbody_params(numtasks, rank, bodyCount, points, bodyCount, time_delta, grav_constant);
 
     // Get the start time of the calculation.
     if (rank == 0) {
         clock_gettime(CLOCK_MONOTONIC, &tstart);
     }
 
-    for (int i = 0; i < totalIterations; i++) {
-        // Process the points.
-        ComputeForces(points, bodyCount, grav_constant, time_delta);
+    // Decide on the simulation strategy.
+    if (numtasks == 1)
+    {
+        // If only one process is running, use the optimised Barnes-Hut implementation.
+        printf("Using Barnes-Hut\n");
+        for (int i = 0; i < total_iterations; i++) {
+            barnes_main();
 
-        //Synchronise the points buffer across all ranks.
-        syncBodiesAcrossRanks(points);
+            if (rank == 0 && args.output)
+            {
+                save_points_iteration(points, bodyCount, i + 1);
+            }
+        }
+    }
+    else
+    {
+        // Otherwise, if there's more than one process (distributed memory), use the naive implementation.
+        printf("Using Naive\n");
+        for (int i = 0; i < total_iterations; i++) {
+            // Process the points.
+            naive_main();
 
-        // Output the points (if we're on the master process).
-        if (rank == 0 && args.output)
-        {
-            save_points_iteration(points, bodyCount, i + 1);
+            // Output the points (if we're on the master process).
+            if (rank == 0 && args.output)
+            {
+                save_points_iteration(points, bodyCount, i + 1);
+            }
         }
     }
 
