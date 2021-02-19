@@ -7,7 +7,7 @@
 #$ -cwd
 #
 # pe (Parallel environment) request. Set your number of processors here.
-#$ -pe openmpi 3
+#$ -pe openmpi_2x1 6
 #
 # Run job through bash shell
 #$ -S /bin/bash
@@ -25,4 +25,4 @@ echo $PE_HOSTFILE
 export OMP_NUM_THREADS=1
 
 # Run your application
-mpirun --map-by ppr:1:node ./nbody.out -f res/data/input_4096.txt -i 500 -o false
+mpirun --map-by ppr:1:node ./nbody.out -f res/data/input_16384.txt -i 1000 -o false

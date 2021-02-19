@@ -26,4 +26,4 @@ echo $PE_HOSTFILE
 export OMP_NUM_THREADS=12
 
 # Run your application
-mpirun -np 1 ./nbody.out -f res/data/input_64.txt -i 1000 -o false
+mpirun -np 1 ./nbody.out -f res/data/input_16384.txt -i 1000 -o false

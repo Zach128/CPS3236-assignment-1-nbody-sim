@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Your job name
-#$ -N NBODY_12x1
+#$ -N NBODY_12x4
 #
 # Use current working directory
 #$ -cwd
@@ -26,4 +26,4 @@ echo $PE_HOSTFILE
 export OMP_NUM_THREADS=12
 
 # Run your application
-mpirun --map-by ppr:1:node ./nbody.out -f res/data/input_64.txt -i 1000 -o false
+mpirun --map-by ppr:1:node ./nbody.out -f res/data/input_16384.txt -i 1000 -o false

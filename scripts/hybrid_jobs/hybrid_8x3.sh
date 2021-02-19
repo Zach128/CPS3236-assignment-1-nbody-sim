@@ -8,7 +8,7 @@
 #
 # pe (Parallel environment) request. Set your number of processors here.
 # Available: openmpi_2x1, openmpi_4x1, openmpi_6x1, openmpi_12x1
-#$ -pe openmpi_8x1 24
+#$ -pe openmpi_12x1 36
 #
 # Run job through bash shell
 #$ -S /bin/bash
@@ -26,4 +26,4 @@ echo $PE_HOSTFILE
 export OMP_NUM_THREADS=8
 
 # Run your application
-mpirun --map-by ppr:1:node ./nbody.out -f res/data/input_64.txt -i 1000 -o false
+mpirun --map-by ppr:1:node ./nbody.out -f res/data/input_16384.txt -i 1000 -o false

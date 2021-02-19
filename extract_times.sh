@@ -1,5 +1,6 @@
 files=($(find $1*))
 
+count=0
 avg=0
 for o in "${files[@]}"
 do
@@ -9,10 +10,11 @@ do
   if [ $buf != "-1" ]
   then
     echo $o: $buf
-    avg=$(echo "$buf + $avg" | bc -l)        
+    avg=$(echo "$buf + $avg" | bc -l)
+    count=$((count+1))        
   fi
 done
 
-avg=$(echo "$avg / ${#files[@]}" | bc -l)
+avg=$(echo "$avg / $count" | bc -l)
 
 echo Extracted time: $avg
