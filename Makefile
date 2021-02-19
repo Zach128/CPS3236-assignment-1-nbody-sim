@@ -22,9 +22,13 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 # Add a prefix to INC_DIRS. So moduleA would become -ImoduleA. GCC understands this -I flag
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
+use_omp := true
+
 # If we want to use OpenMP, add in the appropriate directives.
 ifeq ($(use_omp),true)
 OMP_FLAG := -DUSE_OMP -fopenmp
+else ifeq ($(use_omp),false)
+OMP_FLAG := 
 endif
 
 ifeq ($(debug),true)
@@ -66,7 +70,7 @@ help:
 	@echo -----------------------------------------------------------------
 	@echo make: Make into nbody.out
 	@echo make debug=true: Enable debug \(-g\) support.
-	@echo make debug=omp: Enable debug \(-g\) support for mpi parallel programs.
+	@echo make debug=mpi: Enable debug \(-g\) support for mpi parallel programs.
 	@echo make use_omp=true: Make into nbody.out with OpenMP functionality.
 	@echo -----------------------------------------------------------------
 
