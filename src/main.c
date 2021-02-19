@@ -148,7 +148,6 @@ int main(int argc, char **argv) {
            ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
     }
 
-    // For some reason, running the below would cause one of the nodes to throw a segfault.
     // Clean up
     printf("Cleaning up\n");
     MPI_Free_mem(points);

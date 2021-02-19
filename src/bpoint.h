@@ -11,12 +11,11 @@
 #define Y_RAND_MAX 5000
 #define Y_RAND_MIN -5000
 
-typedef struct {
+typedef struct b_point {
     double mass;
     vec2 vel;
     vec2 pos;
-} body_point;
-typedef body_point b_point;
+} b_point;
 
 /**
  * Function: get_mpi_b_point_type
@@ -32,9 +31,9 @@ MPI_Datatype get_mpi_b_point_type();
  * ----------------------
  * Print the points in a given array.
  * Values are printed in the following format:
- * mass | x | y
- * %.3f %.3f %.3f
- * ex: 6.123 -4.212 -232.125
+ * mass | vel | pos
+ * %.3f %.3f %.3f %.3f %.3f
+ * ex: m: 6.123 v: -4.212, -232.125, p: 100.435, -235.123
  * 
  * points: A point array to be printed.
  * count: How many points are in the array (or to print).
@@ -57,6 +56,10 @@ void generate_rand_points(b_point *points, const int count);
  * Function: print_point
  * ------------------------------
  * Print a given point.
+ * Values are printed in the following format:
+ * mass | vel | pos
+ * %.3f %.3f %.3f %.3f %.3f
+ * ex: m: 6.123 v: -4.212, -232.125, p: 100.435, -235.123
  * 
  * point: The point to print.
  * 

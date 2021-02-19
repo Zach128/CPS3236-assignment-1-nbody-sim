@@ -165,7 +165,14 @@ bool is_node_close_enough(b_point *target, b_node *tree)
 		.x = tree->boundary.half_size.x * 2,
 		.y = tree->boundary.half_size.y * 2
 	};
-	vec2 d = { .x = fabs(target->pos.x - tree->center_of_mass.v.x), .y = fabs(target->pos.y - tree->center_of_mass.v.y) };
+
+	// Get the distance vector between the target point and the node in-question.
+	vec2 d = {
+		.x = fabs(target->pos.x - tree->center_of_mass.v.x),
+		.y = fabs(target->pos.y - tree->center_of_mass.v.y)
+	};
+	
+	// Calculate the final quotient.
 	double s = (fullSize.x + fullSize.y) / 2;
 	double qoutient = s / VEC2_LENGTH(d);
 
@@ -174,7 +181,6 @@ bool is_node_close_enough(b_point *target, b_node *tree)
 
 void barnes_compute_force(b_point *target, b_node *tree, vec2 *force)
 {
-
 	for (int i = 0; i < tree->child_count; i++)
 	{
 		if (tree->children[i] != NULL)
@@ -187,7 +193,7 @@ void barnes_compute_force(b_point *target, b_node *tree, vec2 *force)
 			}
 			else
 			{
-				// Otherwise
+				// Otherwise, only get the force of the nodes center of mass.
 				get_force(target, &tree->children[i]->center_of_mass.v, tree->children[i]->center_of_mass.m, force);
 			}
 		}
