@@ -1,4 +1,4 @@
-# CPS-3236-Assignment 1
+# CPS3236-Assignment 1
 
 zcau0001
 ---
@@ -22,6 +22,7 @@ zcau0001
 
 * `./nbody.out -f <path-to-file>` Runs the application using a given file as input. Results are output in the directors `res/out/` relative to the project.
 * `mpirun --map-by ppr:1:node ./nbody.out -f <path-to-file>` Run the application in a distributed memory environment. Runs one instance of the program per-node/host. Changing the number in `ppr:1:node` changes how many instances are run per-node/host.
+* `python3 body-viewer/main.py` Runs the output viewer program. An animated gif is produced once the input directory is provided and output in the `res` folder.
 
 ## How to debug the project.
 
